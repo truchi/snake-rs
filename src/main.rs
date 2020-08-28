@@ -1,51 +1,43 @@
 mod direction;
+mod events;
+mod game;
+mod menu;
 mod position;
 mod screen;
 mod snake;
+mod welcome;
 mod world;
 
 use direction::*;
+use events::*;
+use game::*;
+use menu::*;
 use position::*;
 use screen::*;
 use snake::*;
+use welcome::*;
 use world::*;
 
-use crossterm::event::{poll, read, Event, KeyCode, KeyEvent};
-use std::time::Duration;
+use std::{thread::sleep, time::Duration};
 
 fn main() {
-    let mut world = World::new();
-    println!("Hello, {:#?}", world);
-    for _ in 0..100 {
-        world.r#move();
-    }
-    // event_loop();
+    let mut game = Game::new();
+    game.init();
+
+    // let screen = Screen::new();
+    // let mut world = World::new(screen.bounds());
+    // world.render();
+    // event_loop(&mut world);
+
+    // sleep(Duration::from_millis(1000));
 }
 
-fn event_loop() {
+fn event_loop(world: &mut World) {
+    let FPS = 10;
     loop {
-        if poll(Duration::from_secs(0)).unwrap() {
-            let event = read().unwrap();
-            if let Event::Key(KeyEvent { code, .. }) = event {
-                match code {
-                    KeyCode::Up => {
-                        println!("Up");
-                    }
-                    KeyCode::Down => {
-                        println!("Down");
-                    }
-                    KeyCode::Left => {
-                        println!("Left");
-                    }
-                    KeyCode::Right => {
-                        println!("Right");
-                    }
-                    _ => {}
-                }
-            } else if let Event::Resize(..) = event {
-                panic!("Resize");
-            }
-            break;
-        }
+        let events = poll();
+        // world.update(events);
+        world.render();
+        sleep(Duration::from_millis(200));
     }
 }
