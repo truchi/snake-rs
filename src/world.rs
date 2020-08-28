@@ -1,13 +1,6 @@
-use crate::{Direction, Event, Position, Snake};
+use crate::{Direction, KeyCode, Position, Snake};
 use crossterm::terminal::{Clear, ClearType};
 use std::fmt::{Display, Formatter};
-
-#[derive(Debug)]
-pub enum State {
-    Playing,
-    Paused,
-    Resized,
-}
 
 #[derive(Debug)]
 pub struct World {
@@ -23,26 +16,22 @@ impl World {
         Self { bounds, snake }
     }
 
-    pub fn update(&mut self, events: Vec<Event>) -> State {
-        State::Playing
+    pub fn handle(&mut self, code: KeyCode) {
+        match code {
+            KeyCode::Up => self.set_direction(Direction::Up),
+            KeyCode::Down => self.set_direction(Direction::Down),
+            KeyCode::Left => self.set_direction(Direction::Left),
+            KeyCode::Right => self.set_direction(Direction::Right),
+            _ => {}
+        }
+    }
+
+    pub fn update(&mut self) {
+        self.snake.update();
     }
 
     fn set_direction(&mut self, direction: Direction) {
         self.snake.set_direction(direction);
-    }
-
-    fn r#move(&mut self) {
-        // let moved = self.snake.slither(self.screen.bounds());
-        // match moved {
-        // Ok(_) => (),
-        // Err(err) => {
-        // println!("BANG!!! {:#?}", err);
-        // panic!();
-        // }
-        // }
-        // println!("{:#?}", self.snake);
-
-        ()
     }
 
     pub fn render(&self) {

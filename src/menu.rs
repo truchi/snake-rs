@@ -1,4 +1,11 @@
-use crate::events::{poll, Event, KeyCode, KeyEvent};
+use crate::{
+    events::{poll, Event, KeyCode, KeyEvent},
+    KEYS,
+    MENU_FPS,
+    SNAKE,
+    SNAKE_HEIGHT,
+    SNAKE_WIDTH,
+};
 use crossterm::{
     cursor::MoveTo,
     queue,
@@ -11,32 +18,20 @@ use std::{
     time::Duration,
 };
 
-const HEADER: [&str; 5] = [
-    r"🐍🐍👅  🐍    👅      🐍      🐍  👅  🐍🐍👅",
-    r"🐍      🐍🐍  🐍     🐍🐍     🐍 🐍   🐍    ",
-    r"🐍🐍🐍  🐍 🐍 🐍    🐍  🐍    🐍🐍    🐍🐍  ",
-    r"    🐍  🐍  🐍🐍   🐍 🐍 🐍   🐍 🐍   🐍    ",
-    r"🐍🐍🐍  🐍    🐍  🐍      👅  🐍  🐍  🐍🐍🐍",
-];
-const HEADER_WIDTH: u16 = HEADER[0].len() as u16 - 19; // Adjust because weird chars
-const HEADER_HEIGHT: u16 = HEADER.len() as u16;
-
-const KEYS: [&str; 9] = [
-    "[", "↲", " play ", "↑", " prev ", "↓", " next ", "ESC", " quit]",
-];
-
-pub enum Selection {
+#[derive(Debug)]
+pub enum MenuAction {
     Level(u8),
     Quit,
 }
 
+#[derive(Debug)]
 pub struct Menu {
     out:      Stdout,
     levels:   [&'static str; 5],
     selected: u8,
     max:      u8,
-    header_x: u16,
-    header_y: u16,
+    snake_x:  u16,
+    snake_y:  u16,
     levels_x: u16,
     levels_y: u16,
     keys_x:   u16,
@@ -53,7 +48,7 @@ impl Menu {
             "Level 2 - Snake Den",
             "Level 3 - Lol",
             "Level 4 - Snake ...",
-            "Level 5 - Snake ... MEGA HARDCORE",
+            "Level 5 - Snake ... HARDCORE",
         ];
         let levels_width = levels
             .iter()
@@ -62,10 +57,10 @@ impl Menu {
         let levels_height = levels.len() as u16;
         let keys_width = KEYS.iter().fold(0, |acc, s| acc + s.len() as u16);
 
-        let header_x = (width - HEADER_WIDTH) / 2;
-        let header_y = 1;
+        let snake_x = (width - SNAKE_WIDTH) / 2;
+        let snake_y = (height - SNAKE_HEIGHT - 2 - levels_height - 2) / 2;
         let levels_x = (width - levels_width) / 2;
-        let levels_y = header_y + HEADER_HEIGHT + 2;
+        let levels_y = snake_y + SNAKE_HEIGHT + 2;
         let keys_x = (width - keys_width) / 2;
         let keys_y = levels_y + levels_height + 1;
 
@@ -74,8 +69,8 @@ impl Menu {
             levels,
             selected,
             max,
-            header_x,
-            header_y,
+            snake_x,
+            snake_y,
             levels_x,
             levels_y,
             keys_x,
@@ -83,9 +78,31 @@ impl Menu {
         }
     }
 
-    pub fn show(&mut self) -> Selection {
+    pub fn show(&mut self, snake_y_anim: Option<u16>) -> MenuAction {
+        if let Some(mut snake_y_anim) = snake_y_anim {
+            loop {
+                if snake_y_anim == self.snake_y {
+                    break;
+                }
+
+                self.snake_frame(&snake_y_anim);
+                self.out.flush().unwrap();
+
+                sleep(Duration::from_millis(1000 / MENU_FPS));
+
+                if let Some(Event::Key(KeyEvent { code, .. })) = poll() {
+                    if code == KeyCode::Esc {
+                        return MenuAction::Quit;
+                    }
+                }
+
+                self.next_anim_state(&mut snake_y_anim);
+                queue!(self.out, Clear(ClearType::All)).unwrap();
+            }
+        }
+
         loop {
-            self.header();
+            self.snake();
             self.levels();
             self.keys();
             self.out.flush().unwrap();
@@ -102,10 +119,10 @@ impl Menu {
                             break;
                         }
                         KeyCode::Enter => {
-                            return Selection::Level(self.selected);
+                            return MenuAction::Level(self.selected);
                         }
                         KeyCode::Esc => {
-                            return Selection::Quit;
+                            return MenuAction::Quit;
                         }
                         _ => {}
                     }
@@ -131,13 +148,33 @@ impl Menu {
         }
     }
 
-    fn header(&mut self) {
-        for y in 0..HEADER_HEIGHT {
+    fn snake_frame(&mut self, snake_y_anim: &u16) {
+        for y in 0..SNAKE_HEIGHT {
             queue!(
                 self.out,
-                MoveTo(self.header_x, self.header_y + y),
+                MoveTo(self.snake_x, snake_y_anim + y),
                 Clear(ClearType::CurrentLine),
-                Print(&HEADER[y as usize]),
+                Print(&SNAKE[y as usize])
+            )
+            .unwrap();
+        }
+    }
+
+    fn next_anim_state(&mut self, snake_y_anim: &mut u16) {
+        if *snake_y_anim > self.snake_y {
+            *snake_y_anim -= 1;
+        } else if *snake_y_anim < self.snake_y {
+            *snake_y_anim += 1;
+        }
+    }
+
+    fn snake(&mut self) {
+        for y in 0..SNAKE_HEIGHT {
+            queue!(
+                self.out,
+                MoveTo(self.snake_x, self.snake_y + y),
+                Clear(ClearType::CurrentLine),
+                Print(&SNAKE[y as usize]),
             )
             .unwrap();
         }

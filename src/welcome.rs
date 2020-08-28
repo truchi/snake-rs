@@ -1,4 +1,18 @@
-use crate::events::{poll, Event};
+use crate::{
+    events::{poll, Event, KeyCode, KeyEvent},
+    CONTINUE,
+    CONTINUE_DELAY,
+    CONTINUE_HEIGHT,
+    CONTINUE_WIDTH,
+    SNAKE,
+    SNAKE_BLINK_TIME,
+    SNAKE_HEIGHT,
+    SNAKE_WIDTH,
+    WELCOME,
+    WELCOME_FPS,
+    WELCOME_HEIGHT,
+    WELCOME_WIDTH,
+};
 use crossterm::{
     cursor::MoveTo,
     queue,
@@ -11,47 +25,11 @@ use std::{
     time::Duration,
 };
 
-const FPS: u64 = 100;
-
-const fn millis_to_frames(millis: u64) -> u64 {
-    FPS * millis / 1000
+#[derive(Debug)]
+pub enum WelcomeAction {
+    Continue,
+    Quit,
 }
-
-/// Half cycle, in frames
-const SNAKE_BLINK_TIME: u64 = millis_to_frames(200);
-
-/// After "snake" started blinking, in frames
-const CONTINUE_DELAY: u64 = millis_to_frames(1000);
-
-const WELCOME: [&str; 11] = [
-    r" __      __       .__                               ",
-    r"/  \    /  \ ____ |  |   ____  ____   _____   ____  ",
-    r"\   \/\/   // __ \|  | _/ ___\/  _ \ /     \_/ __ \ ",
-    r" \        /\  ___/|  |_\  \__(  <_> )  Y Y  \  ___/ ",
-    r"  \__/\  /  \___  >____/\___  >____/|__|_|  /\___  >",
-    r"       \/       \/          \/            \/     \/ ",
-    r"                     __                             ",
-    r"                   _/  |_  ____                     ",
-    r"                   \   __\/  _ \                    ",
-    r"                    |  | (  <_> )                   ",
-    r"                    |__|  \____/                    ",
-];
-const WELCOME_WIDTH: u16 = WELCOME[0].len() as u16;
-const WELCOME_HEIGHT: u16 = WELCOME.len() as u16;
-
-const SNAKE: [&str; 5] = [
-    r"🐍🐍👅  🐍    👅      🐍      🐍  👅  🐍🐍👅",
-    r"🐍      🐍🐍  🐍     🐍🐍     🐍 🐍   🐍    ",
-    r"🐍🐍🐍  🐍 🐍 🐍    🐍  🐍    🐍🐍    🐍🐍  ",
-    r"    🐍  🐍  🐍🐍   🐍 🐍 🐍   🐍 🐍   🐍    ",
-    r"🐍🐍🐍  🐍    🐍  🐍      👅  🐍  🐍  🐍🐍🐍",
-];
-const SNAKE_WIDTH: u16 = SNAKE[0].len() as u16 - 19; // Adjust because weird chars
-const SNAKE_HEIGHT: u16 = SNAKE.len() as u16;
-
-const CONTINUE: [&str; 1] = ["[Press any key to continue]"];
-const CONTINUE_WIDTH: u16 = CONTINUE[0].len() as u16;
-const CONTINUE_HEIGHT: u16 = CONTINUE.len() as u16;
 
 #[derive(Debug)]
 enum State {
@@ -106,18 +84,34 @@ impl Welcome {
         )
     }
 
-    pub fn show(&mut self) {
+    pub fn is_snake_blinking(&self) -> bool {
+        if let State::BlinkingSnake(_) = self.state {
+            true
+        } else {
+            false
+        }
+    }
+
+    pub fn snake_y(&self) -> u16 {
+        self.snake_y
+    }
+
+    pub fn show(&mut self) -> WelcomeAction {
         loop {
             self.welcome_frame();
             self.snake_frame();
             self.continue_frame();
             self.out.flush().unwrap();
 
-            if let Some(Event::Key(_)) = poll() {
-                break;
+            if let Some(Event::Key(KeyEvent { code, .. })) = poll() {
+                if code == KeyCode::Esc {
+                    return WelcomeAction::Quit;
+                } else {
+                    return WelcomeAction::Continue;
+                }
             }
 
-            sleep(Duration::from_millis(1000 / FPS));
+            sleep(Duration::from_millis(1000 / WELCOME_FPS));
             self.next_state();
         }
     }

@@ -6,15 +6,6 @@ use std::{
 };
 
 #[derive(Debug)]
-pub enum Bang {
-    Up,
-    Down,
-    Left,
-    Right,
-    Snake,
-}
-
-#[derive(Debug)]
 pub struct Snake {
     body:      VecDeque<Position>,
     direction: Direction,
@@ -42,9 +33,13 @@ impl Snake {
         }
     }
 
+    pub fn update(&mut self) {
+        self.r#move();
+    }
+
     pub fn r#move(&mut self) {
-        self.body.pop_back();
         self.grow();
+        self.body.pop_back();
     }
 
     pub fn grow(&mut self) {
