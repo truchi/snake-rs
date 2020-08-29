@@ -9,22 +9,22 @@ use std::{
 pub struct Snake {
     body:      VecDeque<Position>,
     direction: Direction,
+    speed:     (u64, u64),
+    frames:    u64,
 }
 
 impl Snake {
-    pub fn new(position: impl Into<Position>, direction: Direction) -> Self {
+    pub fn new(position: impl Into<Position>, direction: Direction, speed: (u64, u64)) -> Self {
         let mut body = VecDeque::new();
         body.push_front(position.into());
+        let frames = 0;
 
-        Self { body, direction }
-    }
-
-    pub fn head(&self) -> Position {
-        *self.body.front().expect("Snake body is empty")
-    }
-
-    pub fn next_head(&self) -> Position {
-        self.head() + self.direction
+        Self {
+            body,
+            direction,
+            speed,
+            frames,
+        }
     }
 
     pub fn set_direction(&mut self, direction: Direction) {
@@ -33,11 +33,7 @@ impl Snake {
         }
     }
 
-    pub fn update(&mut self) {
-        self.r#move();
-    }
-
-    pub fn r#move(&mut self) {
+    pub fn step(&mut self) {
         self.grow();
         self.body.pop_back();
     }
@@ -46,27 +42,33 @@ impl Snake {
         self.body.push_front(self.next_head());
     }
 
-    // pub fn slither(&mut self, max: Position) -> Result<(), Bang> {
-    // let (x, y) = self.head().into();
-    //
-    // match (x, y, self.direction) {
-    // (_, y, Direction::Up) if y == 0 => Err(Bang::Up),
-    // (_, y, Direction::Down) if y == max.y() => Err(Bang::Down),
-    // (x, _, Direction::Left) if x == 0 => Err(Bang::Left),
-    // (x, _, Direction::Right) if x == max.x() => Err(Bang::Right),
-    // (x, y, direction) => {
-    // let new_head = Position::new(x, y) + direction;
-    //
-    // if self.body.contains(&new_head) {
-    // Err(Bang::Snake)
-    // } else {
-    // self.body.pop_back();
-    // self.body.push_front(new_head);
-    // Ok(())
-    // }
-    // }
-    // }
-    // }
+    pub fn update(&mut self) -> Option<Position> {
+        let mut position = None;
+        let speed;
+
+        if self.direction.is_horizontal() {
+            speed = self.speed.0;
+        } else {
+            speed = self.speed.1;
+        }
+
+        if self.frames % speed == 0 {
+            position = Some(self.next_head());
+            self.frames = 0;
+        }
+
+        self.frames += 1;
+
+        position
+    }
+
+    fn head(&self) -> Position {
+        *self.body.front().expect("Snake body is empty")
+    }
+
+    fn next_head(&self) -> Position {
+        self.head() + self.direction
+    }
 }
 
 impl Display for Snake {

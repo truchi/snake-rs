@@ -15,4 +15,12 @@ impl Direction {
             Direction::Right => Direction::Left,
         }
     }
+
+    pub fn is_horizontal(&self) -> bool {
+        if self == &Direction::Left || self == &Direction::Right {
+            return true;
+        }
+
+        return false;
+    }
 }

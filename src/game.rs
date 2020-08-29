@@ -4,13 +4,12 @@ use crate::{
     Screen,
     WelcomeAction,
     World,
+    FPS,
 };
 use std::{
     thread::sleep,
     time::{Duration, Instant},
 };
-
-pub const FPS: u64 = 20;
 
 #[derive(Debug)]
 pub struct Game {

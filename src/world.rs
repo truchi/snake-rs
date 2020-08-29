@@ -1,4 +1,4 @@
-use crate::{Direction, KeyCode, Position, Snake};
+use crate::{Direction, KeyCode, Position, Snake, FPS};
 use crossterm::terminal::{Clear, ClearType};
 use std::fmt::{Display, Formatter};
 
@@ -11,7 +11,7 @@ pub struct World {
 
 impl World {
     pub fn new(bounds: Position) -> Self {
-        let snake = Snake::new((0, 0), Direction::Right);
+        let snake = Snake::new((0, 0), Direction::Right, (1, 2));
 
         Self { bounds, snake }
     }
@@ -27,7 +27,7 @@ impl World {
     }
 
     pub fn update(&mut self) {
-        self.snake.update();
+        let position = self.snake.update();
     }
 
     fn set_direction(&mut self, direction: Direction) {
