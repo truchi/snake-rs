@@ -1,7 +1,7 @@
 use super::Snake;
 use crate::{
     events::KeyCode,
-    geometry::{Direction, Location, Point},
+    geometry::{Direction, Point},
 };
 use crossterm::terminal::{Clear, ClearType};
 use std::fmt::{Display, Formatter};
@@ -33,7 +33,7 @@ impl World {
     pub fn update(&mut self) {
         if let Some(head) = self.snake.update() {
             match head.is_inside(Point::new(0, 0), self.bounds) {
-                Location::Inside =>
+                Ok(()) =>
                     if !self.snake.contains(head) {
                         self.snake.step()
                     },

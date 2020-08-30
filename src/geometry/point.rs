@@ -4,7 +4,8 @@ use std::{
     ops::Add,
 };
 
-#[derive(Eq, PartialEq, Debug)]
+/// Locates a `Point` relatively to two `Point`s (aka a rectangle)
+#[derive(Copy, Clone, Eq, PartialEq, Debug)]
 pub enum Location {
     Top,
     Bottom,
@@ -14,9 +15,9 @@ pub enum Location {
     TopRight,
     BottomLeft,
     BottomRight,
-    Inside,
 }
 
+/// An `x`/`y` `Point`
 #[derive(Copy, Clone, Eq, PartialEq)]
 pub struct Point {
     pub x: i32,
@@ -24,11 +25,13 @@ pub struct Point {
 }
 
 impl Point {
+    /// Returns a new `Point`
     pub fn new(x: i32, y: i32) -> Self {
         Self { x, y }
     }
 
-    pub fn is_inside(&self, top_left: Self, bottom_right: Self) -> Location {
+    /// Checks whether `self`
+    pub fn is_inside(&self, top_left: Self, bottom_right: Self) -> Result<(), Location> {
         let Self { x, y } = *self;
         let Self { x: top, y: left } = top_left;
         let Self {
@@ -38,30 +41,31 @@ impl Point {
 
         return if x < top {
             if y < left {
-                Location::TopLeft
+                Err(Location::TopLeft)
             } else if y > right {
-                Location::TopRight
+                Err(Location::TopRight)
             } else {
-                Location::Top
+                Err(Location::Top)
             }
         } else if x > bottom {
             if y < left {
-                Location::BottomLeft
+                Err(Location::BottomLeft)
             } else if y > right {
-                Location::BottomRight
+                Err(Location::BottomRight)
             } else {
-                Location::Bottom
+                Err(Location::Bottom)
             }
         } else if y < left {
-            Location::Left
+            Err(Location::Left)
         } else if y > right {
-            Location::Right
+            Err(Location::Right)
         } else {
-            Location::Inside
+            Ok(())
         };
     }
 }
 
+/// `Direction`s translate into unit vectors
 impl From<Direction> for Point {
     fn from(direction: Direction) -> Self {
         match direction {
@@ -99,6 +103,7 @@ mod tests {
         let top_left_corner = Point::new(0, 0);
         let bottom_right_corner = Point::new(10, 10);
 
+        let inside = Point::new(5, 5);
         let top = Point::new(-1, 5);
         let bottom = Point::new(20, 5);
         let left = Point::new(5, -1);
@@ -120,9 +125,14 @@ mod tests {
         ] {
             assert_eq!(
                 point.is_inside(top_left_corner, bottom_right_corner),
-                *location
+                Err(*location)
             );
         }
+
+        assert_eq!(
+            inside.is_inside(top_left_corner, bottom_right_corner),
+            Ok(())
+        );
     }
 
     #[test]

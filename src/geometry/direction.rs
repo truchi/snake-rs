@@ -1,3 +1,4 @@
+/// `Up`, `Down`, `Left`, `Right`
 #[derive(Copy, Clone, Eq, PartialEq, Debug)]
 pub enum Direction {
     Up,
@@ -7,6 +8,8 @@ pub enum Direction {
 }
 
 impl Direction {
+    /// Returns the opposite `Direction`
+    /// (`Up` <-> `Down`, `Left` <-> `Right`)
     pub fn opposite(&self) -> Self {
         match self {
             Direction::Up => Direction::Down,
@@ -16,6 +19,8 @@ impl Direction {
         }
     }
 
+    /// Returns `true` if horizontal
+    /// (`Left` / `Right`)
     pub fn is_horizontal(&self) -> bool {
         if self == &Direction::Left || self == &Direction::Right {
             return true;
