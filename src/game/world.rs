@@ -1,16 +1,20 @@
-use crate::{Direction, Inside, KeyCode, Position, Snake, FPS};
+use super::Snake;
+use crate::{
+    events::KeyCode,
+    geometry::{Direction, Location, Point},
+};
 use crossterm::terminal::{Clear, ClearType};
 use std::fmt::{Display, Formatter};
 
 #[derive(Debug)]
 pub struct World {
-    bounds: Position,
+    bounds: Point,
     snake:  Snake,
     // eatables: Vec<Position>,
 }
 
 impl World {
-    pub fn new(bounds: Position) -> Self {
+    pub fn new(bounds: Point) -> Self {
         let snake = Snake::new((0, 0), Direction::Right, (20, 8));
 
         Self { bounds, snake }
@@ -29,7 +33,7 @@ impl World {
     pub fn update(&mut self) {
         if let Some(head) = self.snake.update() {
             match head.is_inside((0, 0).into(), self.bounds) {
-                Inside::Inside =>
+                Location::Inside =>
                     if !self.snake.contains(head) {
                         self.snake.step()
                     },

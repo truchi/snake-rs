@@ -1,10 +1,6 @@
 use crate::{
+    consts::{KEYS, MENU_FPS, SNAKE, SNAKE_HEIGHT, SNAKE_WIDTH},
     events::{poll, Event, KeyCode, KeyEvent},
-    KEYS,
-    MENU_FPS,
-    SNAKE,
-    SNAKE_HEIGHT,
-    SNAKE_WIDTH,
 };
 use crossterm::{
     cursor::MoveTo,

@@ -1,4 +1,5 @@
-use crate::{Direction, Stepper};
+use super::Stepper;
+use crate::geometry::Direction;
 
 #[derive(Debug)]
 pub struct HVStepper {

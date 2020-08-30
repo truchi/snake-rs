@@ -1,4 +1,7 @@
-use crate::{Direction, HVStepper, Position};
+use crate::{
+    geometry::{Direction, Point},
+    physics::HVStepper,
+};
 use crossterm::cursor::MoveTo;
 use std::{
     collections::VecDeque,
@@ -7,14 +10,14 @@ use std::{
 
 #[derive(Debug)]
 pub struct Snake {
-    body:      VecDeque<Position>,
+    body:      VecDeque<Point>,
     direction: Direction,
     stepper:   HVStepper,
     speed:     (u64, u64),
 }
 
 impl Snake {
-    pub fn new(position: impl Into<Position>, direction: Direction, speed: (u64, u64)) -> Self {
+    pub fn new(position: impl Into<Point>, direction: Direction, speed: (u64, u64)) -> Self {
         let mut body = VecDeque::new();
         body.push_front(position.into());
         let stepper = HVStepper::new(speed.0, speed.1);
@@ -33,7 +36,7 @@ impl Snake {
         }
     }
 
-    pub fn update(&mut self) -> Option<Position> {
+    pub fn update(&mut self) -> Option<Point> {
         let mut position = None;
 
         if self.stepper.step(self.direction) {
@@ -43,7 +46,7 @@ impl Snake {
         position
     }
 
-    pub fn contains(&self, position: Position) -> bool {
+    pub fn contains(&self, position: Point) -> bool {
         self.body.contains(&position)
     }
 
@@ -56,11 +59,11 @@ impl Snake {
         self.body.push_front(self.next_head());
     }
 
-    fn head(&self) -> Position {
+    fn head(&self) -> Point {
         *self.body.front().expect("Snake body is empty")
     }
 
-    fn next_head(&self) -> Position {
+    fn next_head(&self) -> Point {
         self.head() + self.direction
     }
 }

@@ -1,4 +1,5 @@
-use crate::{Menu, MenuAction, Position, Welcome, WelcomeAction, TITLE};
+use super::{Menu, MenuAction, Welcome, WelcomeAction};
+use crate::{consts::TITLE, geometry::Point};
 use crossterm::{
     cursor::{Hide, Show},
     execute,
@@ -58,7 +59,7 @@ impl Screen {
         self.height
     }
 
-    pub fn size(&self) -> Position {
+    pub fn size(&self) -> Point {
         (self.width as i32, self.height as i32).into()
     }
 

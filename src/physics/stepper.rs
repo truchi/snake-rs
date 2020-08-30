@@ -1,4 +1,4 @@
-use crate::FPS;
+use crate::consts::FPS;
 
 #[derive(Debug)]
 pub struct Stepper {

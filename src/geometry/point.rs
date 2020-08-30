@@ -1,11 +1,11 @@
-use crate::Direction;
+use super::Direction;
 use std::{
     fmt::{Debug, Formatter},
     ops::Add,
 };
 
 #[derive(Debug)]
-pub enum Inside {
+pub enum Location {
     Top,
     Bottom,
     Left,
@@ -14,12 +14,12 @@ pub enum Inside {
 }
 
 #[derive(Copy, Clone, Eq, PartialEq)]
-pub struct Position {
+pub struct Point {
     x: i32,
     y: i32,
 }
 
-impl Position {
+impl Point {
     pub fn new(x: i32, y: i32) -> Self {
         Self { x, y }
     }
@@ -32,7 +32,7 @@ impl Position {
         self.y
     }
 
-    pub fn is_inside(&self, top_left: Self, bottom_right: Self) -> Inside {
+    pub fn is_inside(&self, top_left: Self, bottom_right: Self) -> Location {
         let Self { x, y } = *self;
         let Self { x: top, y: left } = top_left;
         let Self {
@@ -41,53 +41,53 @@ impl Position {
         } = bottom_right;
 
         return if x < top {
-            Inside::Top
+            Location::Top
         } else if x > bottom {
-            Inside::Bottom
+            Location::Bottom
         } else if y < left {
-            Inside::Left
+            Location::Left
         } else if y > right {
-            Inside::Right
+            Location::Right
         } else {
-            Inside::Inside
+            Location::Inside
         };
     }
 }
 
-impl From<(i32, i32)> for Position {
+impl From<(i32, i32)> for Point {
     fn from((x, y): (i32, i32)) -> Self {
-        Position::new(x, y)
+        Point::new(x, y)
     }
 }
 
-impl From<Position> for (i32, i32) {
-    fn from(Position { x, y }: Position) -> Self {
+impl From<Point> for (i32, i32) {
+    fn from(Point { x, y }: Point) -> Self {
         (x, y)
     }
 }
 
-impl From<Direction> for Position {
+impl From<Direction> for Point {
     fn from(direction: Direction) -> Self {
         match direction {
-            Direction::Up => Position::new(0, -1),
-            Direction::Down => Position::new(0, 1),
-            Direction::Left => Position::new(-1, 0),
-            Direction::Right => Position::new(1, 0),
+            Direction::Up => Point::new(0, -1),
+            Direction::Down => Point::new(0, 1),
+            Direction::Left => Point::new(-1, 0),
+            Direction::Right => Point::new(1, 0),
         }
     }
 }
 
-impl<T: Into<Position>> Add<T> for Position {
-    type Output = Position;
+impl<T: Into<Point>> Add<T> for Point {
+    type Output = Point;
 
     fn add(self, position: T) -> Self::Output {
-        let Position { x, y } = position.into();
+        let Point { x, y } = position.into();
 
-        Position::new(self.x + x, self.y + y)
+        Point::new(self.x + x, self.y + y)
     }
 }
 
-impl Debug for Position {
+impl Debug for Point {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         write!(f, "({:?}, {:?})", self.x, self.y)
     }

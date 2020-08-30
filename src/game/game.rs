@@ -1,10 +1,8 @@
+use super::World;
 use crate::{
+    consts::FPS,
     events::{poll_all, Event, KeyCode, KeyEvent},
-    MenuAction,
-    Screen,
-    WelcomeAction,
-    World,
-    FPS,
+    screen::{MenuAction, Screen, WelcomeAction},
 };
 use std::{
     thread::sleep,
