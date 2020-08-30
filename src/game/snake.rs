@@ -74,7 +74,7 @@ impl Display for Snake {
             write!(
                 f,
                 "{}🐍", // 🍭🐍👅🦀
-                MoveTo(position.x() as u16, position.y() as u16)
+                MoveTo(position.x as u16, position.y as u16)
             )?;
         }
 

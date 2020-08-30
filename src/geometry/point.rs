@@ -4,32 +4,28 @@ use std::{
     ops::Add,
 };
 
-#[derive(Debug)]
+#[derive(Eq, PartialEq, Debug)]
 pub enum Location {
     Top,
     Bottom,
     Left,
     Right,
+    TopLeft,
+    TopRight,
+    BottomLeft,
+    BottomRight,
     Inside,
 }
 
 #[derive(Copy, Clone, Eq, PartialEq)]
 pub struct Point {
-    x: i32,
-    y: i32,
+    pub x: i32,
+    pub y: i32,
 }
 
 impl Point {
     pub fn new(x: i32, y: i32) -> Self {
         Self { x, y }
-    }
-
-    pub fn x(&self) -> i32 {
-        self.x
-    }
-
-    pub fn y(&self) -> i32 {
-        self.y
     }
 
     pub fn is_inside(&self, top_left: Self, bottom_right: Self) -> Location {
@@ -41,9 +37,21 @@ impl Point {
         } = bottom_right;
 
         return if x < top {
-            Location::Top
+            if y < left {
+                Location::TopLeft
+            } else if y > right {
+                Location::TopRight
+            } else {
+                Location::Top
+            }
         } else if x > bottom {
-            Location::Bottom
+            if y < left {
+                Location::BottomLeft
+            } else if y > right {
+                Location::BottomRight
+            } else {
+                Location::Bottom
+            }
         } else if y < left {
             Location::Left
         } else if y > right {
@@ -90,5 +98,71 @@ impl<T: Into<Point>> Add<T> for Point {
 impl Debug for Point {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         write!(f, "({:?}, {:?})", self.x, self.y)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use pretty_assertions::assert_eq;
+
+    #[test]
+    fn is_inside() {
+        let top_left_corner = Point::new(0, 0);
+        let bottom_right_corner = Point::new(10, 10);
+
+        let top = Point::new(-1, 5);
+        let bottom = Point::new(20, 5);
+        let left = Point::new(5, -1);
+        let right = Point::new(5, 20);
+        let top_left = Point::new(-1, -1);
+        let top_right = Point::new(-1, 20);
+        let bottom_left = Point::new(20, -1);
+        let bottom_right = Point::new(20, 20);
+
+        for (point, location) in &[
+            (top, Location::Top),
+            (bottom, Location::Bottom),
+            (left, Location::Left),
+            (right, Location::Right),
+            (top_left, Location::TopLeft),
+            (top_right, Location::TopRight),
+            (bottom_left, Location::BottomLeft),
+            (bottom_right, Location::BottomRight),
+        ] {
+            assert_eq!(
+                point.is_inside(top_left_corner, bottom_right_corner),
+                *location
+            );
+        }
+    }
+
+    #[test]
+    fn tuple_conversions() {
+        let p = Point::new(11, 22);
+        let (x, y): (i32, i32) = p.into();
+
+        assert_eq!(x, 11);
+        assert_eq!(y, 22);
+
+        let p = (33, 44);
+        let Point { x, y } = p.into();
+
+        assert_eq!(x, 33);
+        assert_eq!(y, 44);
+    }
+
+    #[test]
+    fn from_direction() {
+        assert_eq!(Point::from(Direction::Up), Point::new(0, -1));
+        assert_eq!(Point::from(Direction::Down), Point::new(0, 1));
+        assert_eq!(Point::from(Direction::Left), Point::new(-1, 0));
+        assert_eq!(Point::from(Direction::Right), Point::new(1, 0));
+    }
+
+    #[test]
+    fn add() {
+        assert_eq!(Point::new(1, 2) + Point::new(3, 4), Point::new(4, 6));
+        assert_eq!(Point::new(9, 8) + Direction::Left, Point::new(8, 8));
     }
 }
