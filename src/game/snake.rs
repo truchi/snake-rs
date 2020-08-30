@@ -38,11 +38,11 @@ impl Snake {
     }
 
     pub fn update(&mut self) -> Option<Point> {
-        let mut position = None;
+        let position = None;
 
-        if self.stepper.step(self.direction) {
-            position = Some(self.next_head());
-        }
+        // if self.stepper.step(self.direction) {
+        // position = Some(self.next_head());
+        // }
 
         position
     }
