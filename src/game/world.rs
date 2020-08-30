@@ -15,7 +15,7 @@ pub struct World {
 
 impl World {
     pub fn new(bounds: Point) -> Self {
-        let snake = Snake::new((0, 0), Direction::Right, (20, 8));
+        let snake = Snake::new(Point::new(0, 0), Direction::Right, (20, 8));
 
         Self { bounds, snake }
     }
@@ -32,7 +32,7 @@ impl World {
 
     pub fn update(&mut self) {
         if let Some(head) = self.snake.update() {
-            match head.is_inside((0, 0).into(), self.bounds) {
+            match head.is_inside(Point::new(0, 0), self.bounds) {
                 Location::Inside =>
                     if !self.snake.contains(head) {
                         self.snake.step()

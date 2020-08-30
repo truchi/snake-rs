@@ -62,18 +62,6 @@ impl Point {
     }
 }
 
-impl From<(i32, i32)> for Point {
-    fn from((x, y): (i32, i32)) -> Self {
-        Point::new(x, y)
-    }
-}
-
-impl From<Point> for (i32, i32) {
-    fn from(Point { x, y }: Point) -> Self {
-        (x, y)
-    }
-}
-
 impl From<Direction> for Point {
     fn from(direction: Direction) -> Self {
         match direction {
@@ -135,21 +123,6 @@ mod tests {
                 *location
             );
         }
-    }
-
-    #[test]
-    fn tuple_conversions() {
-        let p = Point::new(11, 22);
-        let (x, y): (i32, i32) = p.into();
-
-        assert_eq!(x, 11);
-        assert_eq!(y, 22);
-
-        let p = (33, 44);
-        let Point { x, y } = p.into();
-
-        assert_eq!(x, 33);
-        assert_eq!(y, 44);
     }
 
     #[test]

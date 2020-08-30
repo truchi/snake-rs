@@ -1,4 +1,5 @@
 use crate::{
+    consts::FPS,
     geometry::{Direction, Point},
     physics::HVStepper,
 };
@@ -17,10 +18,10 @@ pub struct Snake {
 }
 
 impl Snake {
-    pub fn new(position: impl Into<Point>, direction: Direction, speed: (u64, u64)) -> Self {
+    pub fn new(position: Point, direction: Direction, speed: (u64, u64)) -> Self {
         let mut body = VecDeque::new();
         body.push_front(position.into());
-        let stepper = HVStepper::new(speed.0, speed.1);
+        let stepper = HVStepper::new(speed.0, speed.1, FPS);
 
         Self {
             body,
