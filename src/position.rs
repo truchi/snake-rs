@@ -4,6 +4,15 @@ use std::{
     ops::Add,
 };
 
+#[derive(Debug)]
+pub enum Inside {
+    Top,
+    Bottom,
+    Left,
+    Right,
+    Inside,
+}
+
 #[derive(Copy, Clone, Eq, PartialEq)]
 pub struct Position {
     x: i32,
@@ -21,6 +30,27 @@ impl Position {
 
     pub fn y(&self) -> i32 {
         self.y
+    }
+
+    pub fn is_inside(&self, top_left: Self, bottom_right: Self) -> Inside {
+        let Self { x, y } = *self;
+        let Self { x: top, y: left } = top_left;
+        let Self {
+            x: bottom,
+            y: right,
+        } = bottom_right;
+
+        return if x < top {
+            Inside::Top
+        } else if x > bottom {
+            Inside::Bottom
+        } else if y < left {
+            Inside::Left
+        } else if y > right {
+            Inside::Right
+        } else {
+            Inside::Inside
+        };
     }
 }
 

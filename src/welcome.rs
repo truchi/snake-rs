@@ -174,7 +174,12 @@ impl Welcome {
                 } else {
                     self.state = State::SlidingWelcome(x + 1);
                 },
-            State::BlinkingSnake(x) => self.state = State::BlinkingSnake(x + 1),
+            // State::BlinkingSnake(x) => self.state = State::BlinkingSnake(x + 1),
+            State::BlinkingSnake(x) => {
+                // qdf
+
+                self.state = State::BlinkingSnake(x + 1)
+            }
         }
     }
 }

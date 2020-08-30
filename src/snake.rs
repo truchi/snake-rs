@@ -1,4 +1,4 @@
-use crate::{Direction, Position};
+use crate::{Direction, HVStepper, Position};
 use crossterm::cursor::MoveTo;
 use std::{
     collections::VecDeque,
@@ -9,21 +9,21 @@ use std::{
 pub struct Snake {
     body:      VecDeque<Position>,
     direction: Direction,
+    stepper:   HVStepper,
     speed:     (u64, u64),
-    frames:    u64,
 }
 
 impl Snake {
     pub fn new(position: impl Into<Position>, direction: Direction, speed: (u64, u64)) -> Self {
         let mut body = VecDeque::new();
         body.push_front(position.into());
-        let frames = 0;
+        let stepper = HVStepper::new(speed.0, speed.1);
 
         Self {
             body,
             direction,
+            stepper,
             speed,
-            frames,
         }
     }
 
@@ -33,6 +33,20 @@ impl Snake {
         }
     }
 
+    pub fn update(&mut self) -> Option<Position> {
+        let mut position = None;
+
+        if self.stepper.step(self.direction) {
+            position = Some(self.next_head());
+        }
+
+        position
+    }
+
+    pub fn contains(&self, position: Position) -> bool {
+        self.body.contains(&position)
+    }
+
     pub fn step(&mut self) {
         self.grow();
         self.body.pop_back();
@@ -40,26 +54,6 @@ impl Snake {
 
     pub fn grow(&mut self) {
         self.body.push_front(self.next_head());
-    }
-
-    pub fn update(&mut self) -> Option<Position> {
-        let mut position = None;
-        let speed;
-
-        if self.direction.is_horizontal() {
-            speed = self.speed.0;
-        } else {
-            speed = self.speed.1;
-        }
-
-        if self.frames % speed == 0 {
-            position = Some(self.next_head());
-            self.frames = 0;
-        }
-
-        self.frames += 1;
-
-        position
     }
 
     fn head(&self) -> Position {
