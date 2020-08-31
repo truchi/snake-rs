@@ -1,7 +1,7 @@
 use super::Snake;
 use crate::{
     events::KeyCode,
-    geometry::{Direction, Point},
+    physics::{Direction, Point},
 };
 use crossterm::terminal::{Clear, ClearType};
 use std::fmt::{Display, Formatter};
@@ -9,8 +9,7 @@ use std::fmt::{Display, Formatter};
 #[derive(Debug)]
 pub struct World {
     bounds: Point,
-    snake:  Snake,
-    // eatables: Vec<Position>,
+    snake: Snake,
 }
 
 impl World {
@@ -30,19 +29,9 @@ impl World {
         }
     }
 
-    pub fn update(&mut self) {
-        if let Some(head) = self.snake.update() {
-            match head.is_inside(Point::new(0, 0), self.bounds) {
-                Ok(()) =>
-                    if !self.snake.contains(head) {
-                        self.snake.step()
-                    },
-                _ => panic!(),
-            }
-        }
-    }
+    pub fn update(&mut self) {}
 
-    fn set_direction(&mut self, direction: Direction) {
+    fn set_direction(&mut self, direction: impl Into<Direction>) {
         self.snake.set_direction(direction);
     }
 

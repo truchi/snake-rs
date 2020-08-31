@@ -1,18 +1,11 @@
 use super::{Menu, MenuAction, Welcome, WelcomeAction};
-use crate::{consts::TITLE, geometry::Point};
+use crate::{consts::TITLE, physics::Point};
 use crossterm::{
     cursor::{Hide, Show},
-    execute,
-    queue,
+    execute, queue,
     terminal::{
-        disable_raw_mode,
-        enable_raw_mode,
-        size,
-        Clear,
-        ClearType,
-        EnterAlternateScreen,
-        LeaveAlternateScreen,
-        SetTitle,
+        disable_raw_mode, enable_raw_mode, size, Clear, ClearType, EnterAlternateScreen,
+        LeaveAlternateScreen, SetTitle,
     },
 };
 use std::io::{stdout, Stdout, Write};
@@ -22,12 +15,12 @@ const RAW_MODE: bool = true;
 
 #[derive(Debug)]
 pub struct Screen {
-    out:             Stdout,
-    entered:         bool,
-    width:           u16,
-    height:          u16,
-    welcome:         Welcome,
-    menu:            Menu,
+    out: Stdout,
+    entered: bool,
+    width: u16,
+    height: u16,
+    welcome: Welcome,
+    menu: Menu,
     menu_shown_once: bool,
 }
 
@@ -60,7 +53,7 @@ impl Screen {
     }
 
     pub fn size(&self) -> Point {
-        Point::new(self.width as i32, self.height as i32)
+        (self.width, self.height).into()
     }
 
     pub fn clear(&mut self) {

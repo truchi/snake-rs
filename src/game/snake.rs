@@ -1,37 +1,37 @@
-use crate::{
-    consts::FPS,
-    geometry::{Direction, Point},
-    physics::HVStepper,
-};
+use crate::physics::{Direction, Point, Speed2D};
 use crossterm::cursor::MoveTo;
 use std::{
     collections::VecDeque,
     fmt::{Display, Formatter},
 };
 
+/// The infamous `Snake`
 #[derive(Debug)]
 pub struct Snake {
-    body:      VecDeque<Point>,
+    body: VecDeque<Point>,
     direction: Direction,
-    stepper:   HVStepper,
-    speed:     (u64, u64),
+    speed: Speed2D,
 }
 
 impl Snake {
-    pub fn new(position: Point, direction: Direction, speed: (u64, u64)) -> Self {
+    pub fn new(
+        position: impl Into<Point>,
+        direction: impl Into<Direction>,
+        speed: impl Into<Speed2D>,
+    ) -> Self {
         let mut body = VecDeque::new();
         body.push_front(position.into());
-        let stepper = HVStepper::new(speed.0, speed.1, FPS);
 
         Self {
             body,
-            direction,
-            stepper,
-            speed,
+            direction: direction.into(),
+            speed: speed.into(),
         }
     }
 
-    pub fn set_direction(&mut self, direction: Direction) {
+    pub fn set_direction(&mut self, direction: impl Into<Direction>) {
+        let direction = direction.into();
+
         if self.direction.opposite() != direction {
             self.direction = direction
         }
@@ -40,33 +40,29 @@ impl Snake {
     pub fn update(&mut self) -> Option<Point> {
         let position = None;
 
-        // if self.stepper.step(self.direction) {
-        // position = Some(self.next_head());
-        // }
-
         position
     }
 
-    pub fn contains(&self, position: Point) -> bool {
-        self.body.contains(&position)
+    pub fn contains(&self, position: impl Into<Point>) -> bool {
+        self.body.contains(&position.into())
     }
 
-    pub fn step(&mut self) {
-        self.grow();
-        self.body.pop_back();
-    }
+    // pub fn step(&mut self) {
+    // self.grow();
+    // self.body.pop_back();
+    // }
 
-    pub fn grow(&mut self) {
-        self.body.push_front(self.next_head());
-    }
+    // fn head(&self) -> Point {
+    // *self.body.front().expect("Snake body is empty")
+    // }
 
-    fn head(&self) -> Point {
-        *self.body.front().expect("Snake body is empty")
-    }
+    // pub fn grow(&mut self) {
+    // self.body.push_front(self.next_head());
+    // }
 
-    fn next_head(&self) -> Point {
-        self.head() + self.direction
-    }
+    // fn next_head(&self) -> Point {
+    // self.head() + self.direction
+    // }
 }
 
 impl Display for Snake {
@@ -75,7 +71,7 @@ impl Display for Snake {
             write!(
                 f,
                 "{}🐍", // 🍭🐍👅🦀
-                MoveTo(position.x as u16, position.y as u16)
+                MoveTo(position.x.as_units(), position.y.as_units())
             )?;
         }
 

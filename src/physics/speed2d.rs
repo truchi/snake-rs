@@ -5,9 +5,9 @@ use std::ops::Rem;
 #[derive(Copy, Clone, Eq, PartialEq, Default, Debug)]
 pub struct Speed2D {
     /// The horizontal `Speed`.
-    horizontal: Speed,
+    pub horizontal: Speed,
     /// The vertical `Speed`.
-    vertical: Speed,
+    pub vertical: Speed,
 }
 
 impl Speed2D {
