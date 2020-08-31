@@ -8,9 +8,9 @@ pub struct HVStepper {
 }
 
 impl HVStepper {
-    pub fn new(horizontal_speed: u64, vertical_speed: u64, frames: u64) -> Self {
-        let horizontal = Stepper::new(horizontal_speed, frames);
-        let vertical = Stepper::new(vertical_speed, frames);
+    pub fn new(horizontal_cells: u64, vertical_cells: u64, frames: u64) -> Self {
+        let horizontal = Stepper::new(horizontal_cells, frames);
+        let vertical = Stepper::new(vertical_cells, frames);
 
         Self {
             horizontal,
@@ -18,11 +18,11 @@ impl HVStepper {
         }
     }
 
-    pub fn step(&mut self, direction: Direction) -> u64 {
+    pub fn next(&mut self, direction: Direction) -> u64 {
         return if direction.is_horizontal() {
-            self.horizontal.step()
+            self.horizontal.next()
         } else {
-            self.vertical.step()
+            self.vertical.next()
         };
     }
 }
@@ -46,9 +46,9 @@ mod tests {
         for run in 1..=runs {
             for i in 0..(2 * frames) {
                 if i % 2 == 0 {
-                    h_stepped += stepper.step(Direction::Left);
+                    h_stepped += stepper.next(Direction::Left);
                 } else {
-                    v_stepped += stepper.step(Direction::Up);
+                    v_stepped += stepper.next(Direction::Up);
                 }
             }
 

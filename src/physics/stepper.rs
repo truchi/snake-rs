@@ -1,20 +1,40 @@
+/// Emits `step`s at a ratio of a rational number -- the speed
+///
+/// Used to move object at some speed when calling at regular intervals. The
+/// speed may be greater than one, i.e. objects can move faster in space than in
+/// time. When the speed is not an integer, we do our best to spread the
+/// motion across time.
 #[derive(Debug)]
 pub struct Stepper {
-    steps: Vec<u64>,
-    step:  u64,
-    index: usize,
+    /// The sequence of `frames` to wait for each `step`
+    sequence: Vec<u64>,
+    /// The current `step`ping progress
+    progress: u64,
+    /// The current index in the sequence
+    index:    usize,
 }
 
 impl Stepper {
+    /// Returns a new `Stepper`
+    ///
+    /// # Panics
+    ///
+    /// Panics if `cells` or `frames` is `0`
     pub fn new(cells: u64, frames: u64) -> Self {
-        let steps = to_steps(cells, frames);
-        let step = 0;
+        let sequence = to_sequence(cells, frames);
+        let progress = 0;
         let index = 0;
 
-        Self { steps, step, index }
+        Self {
+            sequence,
+            progress,
+            index,
+        }
     }
 
-    pub fn step(&mut self) -> u64 {
+    /// Progresses the `Stepper` by one `frame` and returns the corresponding
+    /// `step` count
+    pub fn next(&mut self) -> u64 {
         let mut steps = 0;
 
         // We may have `0`s in `steps` before the actual waiting integer
@@ -26,7 +46,7 @@ impl Stepper {
         }
 
         // Stepping?
-        if self.step == 0 {
+        if self.progress == 0 {
             loop {
                 steps += 1;
                 self.tick();
@@ -45,27 +65,46 @@ impl Stepper {
         steps
     }
 
+    /// Progresses the inner state by one
+    ///
+    /// A `frame` might take multiple `tick`s!
     fn tick(&mut self) {
-        self.step += 1;
+        // Increment progress
+        self.progress += 1;
 
-        if self.step >= self.steps[self.index] {
-            self.step = 0;
+        // When reached stepping
+        if self.progress >= self.sequence[self.index] {
+            // Reset progress
+            self.progress = 0;
+            // Increment index
             self.index += 1;
-            self.index %= self.steps.len();
+            self.index %= self.sequence.len();
         }
     }
 
+    /// Returns `true` if this `tick` is not a full `frame` (in which case we
+    /// might want to `tick` again to go to the next `frame`)
     fn should_retick(&self) -> bool {
-        self.steps[self.index] < 1
+        self.sequence[self.index] < 1
     }
 }
 
-fn to_steps(cells: u64, frames: u64) -> Vec<u64> {
+/// Sequences a rational number into a `Vec` of steps
+///
+/// TODO documentation
+///
+/// # Panics
+///
+/// Panics if `cells` or `frames` is `0`
+fn to_sequence(cells: u64, frames: u64) -> Vec<u64> {
     assert!(cells > 0, "Cells cannot be 0");
     assert!(frames > 0, "Frames cannot be 0");
 
     let mut vec = Vec::with_capacity(cells as usize);
 
+    // When `cells` is a multiple of `frames`,
+    // we fill `vec` with the `frames / cell` ratio
+    // User might want to reduce the fraction
     if frames % cells == 0 {
         for _ in 0..cells {
             vec.push(frames / cells);
@@ -74,6 +113,8 @@ fn to_steps(cells: u64, frames: u64) -> Vec<u64> {
         return vec;
     }
 
+    // When the fraction is irrational, we can express it under the form:
+    // [floor(frames / cells) | ceil(frames / cells)]+
     let lower = frames / cells;
     let upper = lower + 1;
     let upper_total = frames - (cells * lower);
@@ -112,7 +153,7 @@ pub fn debug_steps(cells: u64, frames: u64) {
         color = Color::Blue;
     }
 
-    let steps = to_steps(cells, frames);
+    let steps = to_sequence(cells, frames);
     let len = steps.len() as u64;
     let sum = steps.iter().fold(0, |sum, i| sum + i);
     let len_color = if len == cells {
@@ -157,23 +198,23 @@ mod tests {
 
     #[test]
     #[should_panic]
-    fn to_steps_cells_0_panic() {
-        to_steps(0, 10);
+    fn to_sequence_cells_0_panic() {
+        to_sequence(0, 10);
     }
 
     #[test]
     #[should_panic]
-    fn to_steps_frames_0_panic() {
-        to_steps(10, 0);
+    fn to_sequence_frames_0_panic() {
+        to_sequence(10, 0);
     }
 
     #[test]
-    fn to_steps_test() {
+    fn to_sequence_test() {
         let range = 1..200;
 
         for cells in range.clone() {
             for frames in range.clone() {
-                let steps = to_steps(cells, frames);
+                let steps = to_sequence(cells, frames);
                 let len = steps.len() as u64;
                 let sum = steps.iter().fold(0, |sum, i| sum + i);
                 assert_eq!(
@@ -214,7 +255,7 @@ mod tests {
 
                 for run in 1..=runs {
                     for _ in 0..frames {
-                        stepped += stepper.step();
+                        stepped += stepper.next();
                     }
 
                     assert_eq!(

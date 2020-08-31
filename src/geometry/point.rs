@@ -77,11 +77,12 @@ impl From<Direction> for Point {
     }
 }
 
+/// Geometric addition
 impl<T: Into<Point>> Add<T> for Point {
     type Output = Point;
 
-    fn add(self, position: T) -> Self::Output {
-        let Point { x, y } = position.into();
+    fn add(self, point: T) -> Self::Output {
+        let Point { x, y } = point.into();
 
         Point::new(self.x + x, self.y + y)
     }
