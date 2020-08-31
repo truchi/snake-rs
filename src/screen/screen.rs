@@ -53,7 +53,7 @@ impl Screen {
     }
 
     pub fn size(&self) -> Point {
-        (self.width, self.height).into()
+        (self.width as i16, self.height as i16).into()
     }
 
     pub fn clear(&mut self) {

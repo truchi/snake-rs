@@ -71,7 +71,7 @@ impl Display for Snake {
             write!(
                 f,
                 "{}🐍", // 🍭🐍👅🦀
-                MoveTo(position.x.as_units(), position.y.as_units())
+                MoveTo(position.x.as_units() as u16, position.y.as_units() as u16)
             )?;
         }
 

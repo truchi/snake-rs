@@ -1,3 +1,5 @@
+//! Where the fun happens
+
 mod game;
 mod snake;
 mod world;

@@ -10,7 +10,7 @@ use std::{
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Default)]
 pub struct Distance {
     /// The number of units.
-    units: u16,
+    units: i16,
     /// The number of milliunits.
     millis: u16,
 }
@@ -21,22 +21,26 @@ impl Distance {
     /// # Panics
     ///
     /// Panics if `millis >= 1_000`.
-    pub fn new(units: u16, millis: u16) -> Self {
+    pub fn new(units: i16, millis: u16) -> Self {
         debug_assert!(millis < 1_000);
         Self { units, millis }
     }
 
     /// Creates a new `Distance` from `units`.
-    pub fn from_units(units: u16) -> Self {
+    pub fn from_units(units: i16) -> Self {
         Self { units, millis: 0 }
     }
 
     /// Creates a new `Distance` from `units` as `f64`.
+    ///
+    /// # Panics
+    ///
+    /// May overflow when converting fractional part into millis
     pub fn from_units_f64(units: impl Into<f64>) -> Self {
         let units = units.into();
 
         Self {
-            units: units as u16,
+            units: units as i16,
             millis: ((units * 1_000.0) as u128 % 1_000) as u16,
         }
     }
@@ -44,7 +48,7 @@ impl Distance {
     /// Returns the number of *whole* units in this `Distance`.
     ///
     /// Does not include the fractional (millis) part.
-    pub fn as_units(self) -> u16 {
+    pub fn as_units(self) -> i16 {
         self.units
     }
 
@@ -76,25 +80,25 @@ impl Distance {
     }
 }
 
-impl From<(u16, u16)> for Distance {
-    fn from((units, millis): (u16, u16)) -> Self {
+impl From<(i16, u16)> for Distance {
+    fn from((units, millis): (i16, u16)) -> Self {
         Self::new(units, millis)
     }
 }
 
-impl From<Distance> for (u16, u16) {
+impl From<Distance> for (i16, u16) {
     fn from(distance: Distance) -> Self {
         (distance.units, distance.millis)
     }
 }
 
-impl From<u16> for Distance {
-    fn from(units: u16) -> Self {
+impl From<i16> for Distance {
+    fn from(units: i16) -> Self {
         Self::from_units(units)
     }
 }
 
-impl From<Distance> for u16 {
+impl From<Distance> for i16 {
     fn from(distance: Distance) -> Self {
         distance.as_units()
     }

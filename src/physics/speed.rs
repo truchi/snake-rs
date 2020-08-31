@@ -32,7 +32,7 @@ impl Speed {
     }
 
     /// Creates a new `Speed` from an `units_per_sec` speed as `u16`.
-    pub fn from_units_per_sec(units_per_sec: u16) -> Self {
+    pub fn from_units_per_sec(units_per_sec: i16) -> Self {
         Self {
             distance: Distance::from_units(units_per_sec),
             duration: Duration::from_secs(1),
@@ -62,8 +62,8 @@ impl<T: From<Distance>, U: From<Duration>> From<Speed> for (T, U) {
     }
 }
 
-impl From<u16> for Speed {
-    fn from(units_per_sec: u16) -> Self {
+impl From<i16> for Speed {
+    fn from(units_per_sec: i16) -> Self {
         Self::from_units_per_sec(units_per_sec)
     }
 }
