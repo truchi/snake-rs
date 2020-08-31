@@ -127,7 +127,7 @@ impl Welcome {
                     self.out,
                     MoveTo(self.width - x, self.welcome_y + y),
                     Clear(ClearType::CurrentLine),
-                    Print(&WELCOME[y as usize][0..i as usize]),
+                    Print(&WELCOME[usize::from(y)][0..usize::from(i)]),
                 )
                 .unwrap();
             }

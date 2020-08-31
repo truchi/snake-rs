@@ -9,7 +9,7 @@ use std::fmt::{Display, Formatter};
 #[derive(Debug)]
 pub struct World {
     bounds: Point,
-    snake: Snake,
+    snake:  Snake,
 }
 
 impl World {

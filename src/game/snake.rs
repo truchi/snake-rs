@@ -8,9 +8,9 @@ use std::{
 /// The infamous `Snake`
 #[derive(Debug)]
 pub struct Snake {
-    body: VecDeque<Point>,
+    body:      VecDeque<Point>,
     direction: Direction,
-    speed: Speed2D,
+    speed:     Speed2D,
 }
 
 impl Snake {

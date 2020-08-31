@@ -7,15 +7,16 @@ pub struct Speed2D {
     /// The horizontal `Speed`.
     pub horizontal: Speed,
     /// The vertical `Speed`.
-    pub vertical: Speed,
+    pub vertical:   Speed,
 }
 
 impl Speed2D {
-    /// Creates a new `Speed2D` with the specified horizontal and vertical `Speed`s.
+    /// Creates a new `Speed2D` with the specified horizontal and vertical
+    /// `Speed`s.
     pub fn new(horizontal: impl Into<Speed>, vertical: impl Into<Speed>) -> Self {
         Self {
             horizontal: horizontal.into(),
-            vertical: vertical.into(),
+            vertical:   vertical.into(),
         }
     }
 
@@ -61,7 +62,7 @@ mod tests {
             Speed2D::new(Speed::from_units_per_sec(1), Speed::from_units_per_sec(2)),
             Speed2D {
                 horizontal: Speed::from_units_per_sec(1),
-                vertical: Speed::from_units_per_sec(2)
+                vertical:   Speed::from_units_per_sec(2),
             }
         );
     }

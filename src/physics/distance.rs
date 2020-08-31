@@ -5,12 +5,12 @@ use std::{
 
 /// A `Distance` type to represent a span of space.
 ///
-/// Each `Distance` is composed of a whole number of units and a fractional part represented in
-/// milliunits.
+/// Each `Distance` is composed of a whole number of units and a fractional part
+/// represented in milliunits.
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Default)]
 pub struct Distance {
     /// The number of units.
-    units: i16,
+    units:  i16,
     /// The number of milliunits.
     millis: u16,
 }
@@ -32,15 +32,11 @@ impl Distance {
     }
 
     /// Creates a new `Distance` from `units` as `f64`.
-    ///
-    /// # Panics
-    ///
-    /// May overflow when converting fractional part into millis
     pub fn from_units_f64(units: impl Into<f64>) -> Self {
         let units = units.into();
 
         Self {
-            units: units as i16,
+            units:  units as i16,
             millis: ((units * 1_000.0) as u128 % 1_000) as u16,
         }
     }
@@ -56,7 +52,7 @@ impl Distance {
     ///
     /// Includes the fractional (millis) part.
     pub fn as_units_f64(self) -> f64 {
-        self.units as f64 + self.millis as f64 / 1_000.0
+        f64::from(self.units) + f64::from(self.millis) / 1_000.0
     }
 
     /// Adds two `Distance` together.
@@ -169,13 +165,10 @@ mod tests {
 
     #[test]
     fn new() {
-        assert_eq!(
-            Distance::new(12, 99),
-            Distance {
-                units: 12,
-                millis: 99
-            }
-        );
+        assert_eq!(Distance::new(12, 99), Distance {
+            units:  12,
+            millis: 99,
+        });
     }
 
     #[test]

@@ -105,7 +105,7 @@ mod tests {
             Speed::new(Distance::new(1, 200), Duration::new(2, 321)),
             Speed {
                 distance: Distance::new(1, 200),
-                duration: Duration::new(2, 321)
+                duration: Duration::new(2, 321),
             }
         );
     }
