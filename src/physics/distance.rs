@@ -32,7 +32,9 @@ impl Distance {
     }
 
     /// Creates a new `Distance` from `units` as `f64`.
-    pub fn from_units_f64(units: f64) -> Self {
+    pub fn from_units_f64(units: impl Into<f64>) -> Self {
+        let units = units.into();
+
         Self {
             units: units as u16,
             millis: ((units * 1_000.0) as u128 % 1_000) as u16,
@@ -54,7 +56,8 @@ impl Distance {
     }
 
     /// Adds two `Distance` together.
-    pub fn add(self, rhs: Self) -> Self {
+    pub fn add(self, rhs: impl Into<Self>) -> Self {
+        let rhs = rhs.into();
         let mut units = self.units + rhs.units;
         let mut millis = self.millis + rhs.millis;
 
@@ -68,8 +71,8 @@ impl Distance {
     }
 
     /// Multiplies a `Distance` by `f64`.
-    pub fn mul_f64(self, rhs: f64) -> Self {
-        Self::from_units_f64(rhs * self.as_units_f64())
+    pub fn mul_f64(self, rhs: impl Into<f64>) -> Self {
+        Self::from_units_f64(rhs.into() * self.as_units_f64())
     }
 }
 
@@ -79,9 +82,9 @@ impl From<(u16, u16)> for Distance {
     }
 }
 
-impl Into<(u16, u16)> for Distance {
-    fn into(self) -> (u16, u16) {
-        (self.units, self.millis)
+impl From<Distance> for (u16, u16) {
+    fn from(distance: Distance) -> Self {
+        (distance.units, distance.millis)
     }
 }
 
@@ -91,9 +94,9 @@ impl From<u16> for Distance {
     }
 }
 
-impl Into<u16> for Distance {
-    fn into(self) -> u16 {
-        self.as_units()
+impl From<Distance> for u16 {
+    fn from(distance: Distance) -> Self {
+        distance.as_units()
     }
 }
 
@@ -103,36 +106,36 @@ impl From<f64> for Distance {
     }
 }
 
-impl Into<f64> for Distance {
-    fn into(self) -> f64 {
-        self.as_units_f64()
+impl From<Distance> for f64 {
+    fn from(distance: Distance) -> Self {
+        distance.as_units_f64()
     }
 }
 
-impl Add for Distance {
+impl<T: Into<Self>> Add<T> for Distance {
     type Output = Self;
 
-    fn add(self, rhs: Self) -> Self {
+    fn add(self, rhs: T) -> Self {
         self.add(rhs)
     }
 }
 
-impl AddAssign for Distance {
-    fn add_assign(&mut self, rhs: Self) {
+impl<T: Into<Self>> AddAssign<T> for Distance {
+    fn add_assign(&mut self, rhs: T) {
         *self = self.add(rhs);
     }
 }
 
-impl Mul<f64> for Distance {
+impl<T: Into<f64>> Mul<T> for Distance {
     type Output = Self;
 
-    fn mul(self, rhs: f64) -> Self {
+    fn mul(self, rhs: T) -> Self {
         self.mul_f64(rhs)
     }
 }
 
-impl MulAssign<f64> for Distance {
-    fn mul_assign(&mut self, rhs: f64) {
+impl<T: Into<f64>> MulAssign<T> for Distance {
+    fn mul_assign(&mut self, rhs: T) {
         *self = self.mul_f64(rhs);
     }
 }
@@ -149,14 +152,14 @@ impl Debug for Distance {
             if self.millis == 0 {
                 write!(f, "{}u", self.units)
             } else {
-                write!(f, "{}.{}u", self.units, self.millis)
+                write!(f, "{}.{:03}u", self.units, self.millis)
             }
         }
     }
 }
 
 #[cfg(test)]
-mod test {
+mod tests {
     use super::*;
     use pretty_assertions::assert_eq;
 

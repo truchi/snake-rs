@@ -15,25 +15,17 @@ pub struct Point {
 
 impl Point {
     /// Creates a new `Point` from its `x`/`y` coordinates.
-    pub fn new(x: Distance, y: Distance) -> Self {
-        Self { x, y }
-    }
-
-    /// Creates a new `Point` from its `x`/`y` coordinates as `u16`.
-    pub fn from_units(x: u16, y: u16) -> Self {
+    pub fn new(x: impl Into<Distance>, y: impl Into<Distance>) -> Self {
         Self {
-            x: Distance::from_units(x),
-            y: Distance::from_units(y),
+            x: x.into(),
+            y: y.into(),
         }
     }
 
-    /// Returns the coordinates of this `Point` as *whole* units.
-    pub fn as_units(self) -> (u16, u16) {
-        (self.x.as_units(), self.y.as_units())
-    }
-
     /// Adds a `Distance` to each of the coordinates of a `Point`.
-    pub fn add_distance(self, rhs: Distance) -> Self {
+    pub fn add_distance(self, rhs: impl Into<Distance>) -> Self {
+        let rhs = rhs.into();
+
         Self {
             x: self.x + rhs,
             y: self.y + rhs,
@@ -41,40 +33,28 @@ impl Point {
     }
 }
 
-impl From<(Distance, Distance)> for Point {
-    fn from((x, y): (Distance, Distance)) -> Self {
+impl<T: Into<Distance>, U: Into<Distance>> From<(T, U)> for Point {
+    fn from((x, y): (T, U)) -> Self {
         Self::new(x, y)
     }
 }
 
-impl Into<(Distance, Distance)> for Point {
-    fn into(self) -> (Distance, Distance) {
-        (self.x, self.x)
+impl<T: From<Distance>, U: From<Distance>> From<Point> for (T, U) {
+    fn from(point: Point) -> Self {
+        (point.x.into(), point.y.into())
     }
 }
 
-impl From<(u16, u16)> for Point {
-    fn from((x, y): (u16, u16)) -> Self {
-        Self::from_units(x, y)
-    }
-}
-
-impl Into<(u16, u16)> for Point {
-    fn into(self) -> (u16, u16) {
-        self.as_units()
-    }
-}
-
-impl Add<Distance> for Point {
+impl<T: Into<Distance>> Add<T> for Point {
     type Output = Self;
 
-    fn add(self, rhs: Distance) -> Self {
+    fn add(self, rhs: T) -> Self {
         self.add_distance(rhs)
     }
 }
 
-impl AddAssign<Distance> for Point {
-    fn add_assign(&mut self, rhs: Distance) {
+impl<T: Into<Distance>> AddAssign<T> for Point {
+    fn add_assign(&mut self, rhs: T) {
         *self = self.add(rhs);
     }
 }
@@ -86,7 +66,7 @@ impl Debug for Point {
 }
 
 #[cfg(test)]
-mod test {
+mod tests {
     use super::*;
     use pretty_assertions::assert_eq;
 
@@ -102,10 +82,11 @@ mod test {
     }
 
     #[test]
-    fn from_units() {
+    fn add_distance() {
         assert_eq!(
-            Point::from_units(11, 23),
-            Point::new(Distance::new(11, 0), Distance::new(23, 0))
+            Point::new(Distance::new(1, 760), Distance::new(3, 121))
+                .add_distance(Distance::new(9, 122)),
+            Point::new(Distance::new(10, 882), Distance::new(12, 243))
         );
     }
 }

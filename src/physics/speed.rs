@@ -15,9 +15,20 @@ pub struct Speed {
 
 impl Speed {
     /// Creates a new `Speed` with the specified `distance` and `duration`.
-    pub fn new(distance: Distance, duration: Duration) -> Self {
-        // TODO: panic if duration == 0
-        Self { distance, duration }
+    ///
+    /// # Panics
+    ///
+    /// Panics if `duration` is zero.
+    pub fn new(distance: impl Into<Distance>, duration: impl Into<Duration>) -> Self {
+        let duration = duration.into();
+        if duration == Duration::from_secs(0) {
+            panic!("Duration cannot be zero");
+        }
+
+        Self {
+            distance: distance.into(),
+            duration,
+        }
     }
 
     /// Creates a new `Speed` from an `units_per_sec` speed as `u16`.
@@ -28,27 +39,38 @@ impl Speed {
         }
     }
 
+    /// Returns a `Speed` as units per second.
+    pub fn as_units_per_sec(self) -> f64 {
+        self.distance.as_units_f64() / self.duration.as_secs_f64()
+    }
+
     /// Multiplies a `Speed` by a `Duration` to produce the traveled `Distance`.
-    pub fn mul_duration(self, rhs: Duration) -> Distance {
-        self.distance * (rhs.as_secs_f64() / self.duration.as_secs_f64())
+    pub fn mul_duration(self, rhs: impl Into<Duration>) -> Distance {
+        self.distance * (rhs.into().as_secs_f64() / self.duration.as_secs_f64())
     }
 }
 
-impl From<(Distance, Duration)> for Speed {
-    fn from((distance, duration): (Distance, Duration)) -> Self {
-        Self::new(distance, duration)
+impl<T: Into<Distance>, U: Into<Duration>> From<(T, U)> for Speed {
+    fn from((distance, duration): (T, U)) -> Self {
+        Self::new(distance.into(), duration.into())
     }
 }
 
-impl Into<(Distance, Duration)> for Speed {
-    fn into(self) -> (Distance, Duration) {
-        (self.distance, self.duration)
+impl<T: From<Distance>, U: From<Duration>> From<Speed> for (T, U) {
+    fn from(speed: Speed) -> Self {
+        (speed.distance.into(), speed.duration.into())
     }
 }
 
 impl From<u16> for Speed {
     fn from(units_per_sec: u16) -> Self {
         Self::from_units_per_sec(units_per_sec)
+    }
+}
+
+impl From<Speed> for f64 {
+    fn from(speed: Speed) -> Self {
+        speed.as_units_per_sec()
     }
 }
 
@@ -67,9 +89,15 @@ impl Debug for Speed {
 }
 
 #[cfg(test)]
-mod test {
+mod tests {
     use super::*;
     use pretty_assertions::assert_eq;
+
+    #[test]
+    #[should_panic]
+    fn new_duration_0_panic() {
+        Speed::new(Distance::new(1, 200), Duration::new(0, 0));
+    }
 
     #[test]
     fn new() {
@@ -87,6 +115,14 @@ mod test {
         assert_eq!(
             Speed::from_units_per_sec(14),
             Speed::new(Distance::new(14, 0), Duration::new(1, 0))
+        );
+    }
+
+    #[test]
+    fn as_units_per_sec() {
+        assert_eq!(
+            Speed::new(Distance::new(9, 200), Duration::new(2, 0)).as_units_per_sec(),
+            4.6
         );
     }
 

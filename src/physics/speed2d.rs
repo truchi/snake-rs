@@ -12,16 +12,16 @@ pub struct Speed2D {
 
 impl Speed2D {
     /// Creates a new `Speed2D` with the specified horizontal and vertical `Speed`s.
-    pub fn new(horizontal: Speed, vertical: Speed) -> Self {
+    pub fn new(horizontal: impl Into<Speed>, vertical: impl Into<Speed>) -> Self {
         Self {
-            horizontal,
-            vertical,
+            horizontal: horizontal.into(),
+            vertical: vertical.into(),
         }
     }
 
     /// Returns the `Speed` on the specified `Direction`
-    pub fn on_direction(self, direction: Direction) -> Speed {
-        if direction.is_horizontal() {
+    pub fn on_direction(self, direction: impl Into<Direction>) -> Speed {
+        if direction.into().is_horizontal() {
             self.horizontal
         } else {
             self.vertical
@@ -29,31 +29,29 @@ impl Speed2D {
     }
 }
 
-impl From<(Speed, Speed)> for Speed2D {
-    fn from((horizontal, vertical): (Speed, Speed)) -> Self {
-        Self {
-            horizontal,
-            vertical,
-        }
+impl<T: Into<Speed>, U: Into<Speed>> From<(T, U)> for Speed2D {
+    fn from((horizontal, vertical): (T, U)) -> Self {
+        Self::new(horizontal, vertical)
     }
 }
 
-impl Into<(Speed, Speed)> for Speed2D {
-    fn into(self) -> (Speed, Speed) {
-        (self.horizontal, self.vertical)
+impl<T: From<Speed>, U: From<Speed>> From<Speed2D> for (T, U) {
+    fn from(speed: Speed2D) -> Self {
+        (speed.horizontal.into(), speed.vertical.into())
     }
 }
 
-impl Rem<Direction> for Speed2D {
+/// Calls `Speed2D::on_direction`
+impl<T: Into<Direction>> Rem<T> for Speed2D {
     type Output = Speed;
 
-    fn rem(self, rhs: Direction) -> Speed {
+    fn rem(self, rhs: T) -> Speed {
         self.on_direction(rhs)
     }
 }
 
 #[cfg(test)]
-mod test {
+mod tests {
     use super::*;
     use pretty_assertions::assert_eq;
 
