@@ -16,6 +16,7 @@ pub struct Speed {
 impl Speed {
     /// Creates a new `Speed` with the specified `distance` and `duration`.
     pub fn new(distance: Distance, duration: Duration) -> Self {
+        // TODO: panic if duration == 0
         Self { distance, duration }
     }
 

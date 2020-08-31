@@ -1,15 +1,18 @@
-/// `Up`, `Down`, `Left`, `Right`
+/// A type to represent the four `Direction`s.
 #[derive(Copy, Clone, Eq, PartialEq, Debug)]
 pub enum Direction {
+    /// The up `Direction`.
     Up,
+    /// The down `Direction`.
     Down,
+    /// The left `Direction`.
     Left,
+    /// The right `Direction`.
     Right,
 }
 
 impl Direction {
-    /// Returns the opposite `Direction`
-    /// (`Up` <-> `Down`, `Left` <-> `Right`)
+    /// Returns the opposite `Direction`.
     pub fn opposite(&self) -> Self {
         match self {
             Direction::Up => Direction::Down,
@@ -19,14 +22,12 @@ impl Direction {
         }
     }
 
-    /// Returns `true` if horizontal
-    /// (`Left` / `Right`)
+    /// Returns `true` if horizontal.
     pub fn is_horizontal(&self) -> bool {
-        if self == &Direction::Left || self == &Direction::Right {
-            return true;
+        match self {
+            Direction::Left | Direction::Right => true,
+            _ => false,
         }
-
-        return false;
     }
 }
 
