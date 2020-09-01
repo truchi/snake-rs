@@ -1,7 +1,10 @@
-use std::ops::Neg;
+use std::{
+    fmt::{Debug, Error, Formatter},
+    ops::Neg,
+};
 
 /// A type to represent the four `Direction`s.
-#[derive(Copy, Clone, Eq, PartialEq, Debug)]
+#[derive(Copy, Clone, Eq, PartialEq)]
 pub enum Direction {
     /// The up `Direction`.
     Up,
@@ -17,27 +20,10 @@ impl Direction {
     /// Returns the opposite `Direction`.
     pub fn opposite(&self) -> Self {
         match self {
-            Direction::Up => Direction::Down,
-            Direction::Down => Direction::Up,
-            Direction::Left => Direction::Right,
-            Direction::Right => Direction::Left,
-        }
-    }
-
-    /// Returns `true` if the `Direction` is horizontal.
-    pub fn is_horizontal(&self) -> bool {
-        match self {
-            Direction::Left | Direction::Right => true,
-            _ => false,
-        }
-    }
-
-    /// Returns `true` if the `Direction` is heading towards the positive side
-    /// of the axis.
-    pub fn is_positive(&self) -> bool {
-        match self {
-            Direction::Right | Direction::Down => true,
-            _ => false,
+            Self::Up => Self::Down,
+            Self::Down => Self::Up,
+            Self::Left => Self::Right,
+            Self::Right => Self::Left,
         }
     }
 }
@@ -47,6 +33,17 @@ impl Neg for Direction {
 
     fn neg(self) -> Self {
         self.opposite()
+    }
+}
+
+impl Debug for Direction {
+    fn fmt(&self, f: &mut Formatter) -> Result<(), Error> {
+        match self {
+            Self::Up => write!(f, "↑"),
+            Self::Down => write!(f, "↓"),
+            Self::Left => write!(f, "←"),
+            Self::Right => write!(f, "→"),
+        }
     }
 }
 
@@ -61,21 +58,5 @@ mod tests {
         assert_eq!(Direction::Down.opposite(), Direction::Up);
         assert_eq!(Direction::Left.opposite(), Direction::Right);
         assert_eq!(Direction::Right.opposite(), Direction::Left);
-    }
-
-    #[test]
-    fn is_horizontal() {
-        assert_eq!(Direction::Up.is_horizontal(), false);
-        assert_eq!(Direction::Down.is_horizontal(), false);
-        assert_eq!(Direction::Left.is_horizontal(), true);
-        assert_eq!(Direction::Right.is_horizontal(), true);
-    }
-
-    #[test]
-    fn is_positive() {
-        assert_eq!(Direction::Up.is_positive(), false);
-        assert_eq!(Direction::Down.is_positive(), true);
-        assert_eq!(Direction::Left.is_positive(), false);
-        assert_eq!(Direction::Right.is_positive(), true);
     }
 }

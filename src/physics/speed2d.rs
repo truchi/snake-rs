@@ -1,8 +1,11 @@
-use super::{Direction, Speed};
-use std::ops::Rem;
+use super::{Duration, Point, Speed};
+use std::{
+    fmt::{Debug, Error, Formatter},
+    ops::Mul,
+};
 
 /// A `Speed2D` type to represent `Speed`s on both X and Y axis.
-#[derive(Copy, Clone, Eq, PartialEq, Default, Debug)]
+#[derive(Copy, Clone, Eq, PartialEq, Default)]
 pub struct Speed2D {
     /// The horizontal `Speed`.
     pub horizontal: Speed,
@@ -20,14 +23,9 @@ impl Speed2D {
         }
     }
 
-    /// Returns the `Speed` on the specified `Direction`.
-    pub fn on_direction(&self, direction: Direction) -> Speed {
-        match (direction.is_horizontal(), direction.is_positive()) {
-            (true, true) => self.horizontal,
-            (true, false) => -self.horizontal,
-            (false, true) => self.vertical,
-            (false, false) => -self.vertical,
-        }
+    /// Multiplies a `Speed2D` by a `Duration` to produce the traveled `Point`.
+    pub fn mul_duration(&self, rhs: Duration) -> Point {
+        Point::new(self.horizontal * rhs, self.vertical * rhs)
     }
 }
 
@@ -43,12 +41,17 @@ impl<T: From<Speed>, U: From<Speed>> From<Speed2D> for (T, U) {
     }
 }
 
-/// Calls `Speed2D::on_direction`
-impl Rem<Direction> for Speed2D {
-    type Output = Speed;
+impl Mul<Duration> for Speed2D {
+    type Output = Point;
 
-    fn rem(self, rhs: Direction) -> Speed {
-        self.on_direction(rhs)
+    fn mul(self, rhs: Duration) -> Point {
+        self.mul_duration(rhs)
+    }
+}
+
+impl Debug for Speed2D {
+    fn fmt(&self, f: &mut Formatter) -> Result<(), Error> {
+        write!(f, "({:?}, {:?})", self.horizontal, self.vertical)
     }
 }
 
@@ -59,24 +62,24 @@ mod tests {
 
     #[test]
     fn new() {
-        assert_eq!(
-            Speed2D::new(Speed::from_units_per_sec(1), Speed::from_units_per_sec(2)),
-            Speed2D {
-                horizontal: Speed::from_units_per_sec(1),
-                vertical:   Speed::from_units_per_sec(2),
-            }
-        );
+        let horizontal = Speed::from_per_sec(1.0);
+        let vertical = Speed::from_per_sec(2.0);
+
+        assert_eq!(Speed2D::new(horizontal, vertical), Speed2D {
+            horizontal,
+            vertical,
+        });
     }
 
     #[test]
-    fn on_direction() {
-        let horizontal = Speed::from_units_per_sec(3);
-        let vertical = Speed::from_units_per_sec(4);
-        let speed2d = Speed2D::new(horizontal, vertical);
+    fn mul_duration() {
+        let horizontal = Speed::from_per_sec(5.0);
+        let vertical = Speed::from_per_sec(3.0);
+        let duration = Duration::from_secs(2);
 
-        assert_eq!(speed2d.on_direction(Direction::Up), -vertical);
-        assert_eq!(speed2d.on_direction(Direction::Down), vertical);
-        assert_eq!(speed2d.on_direction(Direction::Left), -horizontal);
-        assert_eq!(speed2d.on_direction(Direction::Right), horizontal);
+        assert_eq!(
+            Speed2D::new(horizontal, vertical).mul_duration(duration),
+            Point::new(10.0, 6.0)
+        );
     }
 }

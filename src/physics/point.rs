@@ -1,15 +1,15 @@
-use super::Distance;
+use super::{Direction, Distance};
 use std::{
     fmt::{Debug, Error, Formatter},
-    ops::{Add, AddAssign},
+    ops::{Add, AddAssign, Rem},
 };
 
 /// A `Point` type to represent a position in cartesian space.
-#[derive(Copy, Clone, Eq, PartialEq, Default)]
+#[derive(Copy, Clone, PartialEq, Default)]
 pub struct Point {
-    /// The `Distance` to origin on the X axis.
+    /// The X axis coordinate.
     pub x: Distance,
-    /// The `Distance` to origin on the Y axis.
+    /// The Y axis coordinate.
     pub y: Distance,
 }
 
@@ -25,20 +25,24 @@ impl Point {
     /// Returns a new `Point` only with the whole part of its coordinates,
     /// discarding the fractional parts.
     pub fn trunc(&self) -> Self {
-        Self {
-            x: self.x.trunc(),
-            y: self.y.trunc(),
+        Self::new(self.x.trunc(), self.y.trunc())
+    }
+
+    /// Projects the `Point` along the specified `direction`.
+    pub fn project(&self, direction: Direction) -> Self {
+        match direction {
+            Direction::Up => Self::new(0, -self.y),
+            Direction::Down => Self::new(0, self.y),
+            Direction::Left => Self::new(-self.x, 0),
+            Direction::Right => Self::new(self.x, 0),
         }
     }
 
-    /// Adds a `Distance` to each of the coordinates of a `Point`.
-    pub fn add_distance(&self, rhs: impl Into<Distance>) -> Self {
+    /// Adds two `Point`s together.
+    pub fn add(&self, rhs: impl Into<Self>) -> Self {
         let rhs = rhs.into();
 
-        Self {
-            x: self.x + rhs,
-            y: self.y + rhs,
-        }
+        Self::new(self.x + rhs.x, self.y + rhs.y)
     }
 }
 
@@ -54,15 +58,24 @@ impl<T: From<Distance>, U: From<Distance>> From<Point> for (T, U) {
     }
 }
 
-impl<T: Into<Distance>> Add<T> for Point {
+/// Calls `Point::project`
+impl Rem<Direction> for Point {
     type Output = Self;
 
-    fn add(self, rhs: T) -> Self {
-        self.add_distance(rhs)
+    fn rem(self, rhs: Direction) -> Self {
+        self.project(rhs)
     }
 }
 
-impl<T: Into<Distance>> AddAssign<T> for Point {
+impl<T: Into<Self>> Add<T> for Point {
+    type Output = Self;
+
+    fn add(self, rhs: T) -> Self {
+        Self::add(&self, rhs)
+    }
+}
+
+impl<T: Into<Self>> AddAssign<T> for Point {
     fn add_assign(&mut self, rhs: T) {
         *self = self.add(rhs);
     }
@@ -81,29 +94,32 @@ mod tests {
 
     #[test]
     fn new() {
-        assert_eq!(
-            Point::new(Distance::new(1, 23), Distance::new(4, 56)),
-            Point {
-                x: Distance::new(1, 23),
-                y: Distance::new(4, 56),
-            }
-        );
+        assert_eq!(Point::new(1.23, 4.56), Point { x: 1.23, y: 4.56 });
     }
 
     #[test]
     fn trunc() {
-        assert_eq!(
-            Point::new(Distance::new(7, 777), Distance::new(8, 888)).trunc(),
-            Point::new(Distance::new(7, 0), Distance::new(8, 0))
-        );
+        assert_eq!(Point::new(7.777, 8.888).trunc(), Point::new(7.0, 8.0));
     }
 
     #[test]
-    fn add_distance() {
-        assert_eq!(
-            Point::new(Distance::new(1, 760), Distance::new(3, 121))
-                .add_distance(Distance::new(9, 122)),
-            Point::new(Distance::new(10, 882), Distance::new(12, 243))
-        );
+    fn project() {
+        let o = 0.0;
+        let x = 5.101;
+        let y = 6.201;
+
+        assert_eq!(Point::new(x, y).project(Direction::Up), Point::new(o, -y));
+        assert_eq!(Point::new(x, y).project(Direction::Down), Point::new(o, y));
+        assert_eq!(Point::new(x, y).project(Direction::Left), Point::new(-x, o));
+        assert_eq!(Point::new(x, y).project(Direction::Right), Point::new(x, o));
+    }
+
+    #[test]
+    fn add() {
+        let point1 = Point::new(1.76, 3.12);
+        let point2 = Point::new(2.11, 1.22);
+        let point3 = Point::new(3.87, 4.34);
+
+        assert_eq!(point1.add(point2), point3);
     }
 }
