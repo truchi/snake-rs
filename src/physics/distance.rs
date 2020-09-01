@@ -1,6 +1,6 @@
 use std::{
     fmt::{Debug, Error, Formatter},
-    ops::{Add, AddAssign, Mul, MulAssign},
+    ops::{Add, AddAssign, Mul, MulAssign, Neg},
 };
 
 /// A `Distance` type to represent a span of space.
@@ -53,6 +53,14 @@ impl Distance {
     /// Includes the fractional (millis) part.
     pub fn as_units_f64(&self) -> f64 {
         f64::from(self.units) + f64::from(self.millis) / 1_000.0
+    }
+
+    /// Changes the sign of the `Distance`.
+    pub fn neg(&self) -> Self {
+        Self {
+            units:  -self.units,
+            millis: self.millis,
+        }
     }
 
     /// Adds two `Distance` together.
@@ -109,6 +117,14 @@ impl From<f64> for Distance {
 impl From<Distance> for f64 {
     fn from(distance: Distance) -> Self {
         distance.as_units_f64()
+    }
+}
+
+impl Neg for Distance {
+    type Output = Self;
+
+    fn neg(self) -> Self {
+        Self::neg(&self)
     }
 }
 
@@ -180,6 +196,7 @@ mod tests {
     #[test]
     fn from_units() {
         assert_eq!(Distance::from_units(3), Distance::new(3, 0));
+        assert_eq!(Distance::from_units(-4), Distance::new(-4, 0));
     }
 
     #[test]
@@ -195,6 +212,12 @@ mod tests {
     #[test]
     fn as_units_f64() {
         assert_eq!(Distance::new(8, 374).as_units_f64(), 8.374);
+    }
+
+    #[test]
+    fn neg() {
+        assert_eq!(Distance::new(76, 765).neg(), Distance::new(-76, 765));
+        assert_eq!(Distance::new(-9, 38).neg(), Distance::new(9, 38));
     }
 
     #[test]
