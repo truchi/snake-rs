@@ -32,7 +32,7 @@ impl Snake {
     pub fn set_direction(&mut self, direction: impl Into<Direction>) {
         let direction = direction.into();
 
-        if self.direction != !direction {
+        if self.direction != -direction {
             self.direction = direction
         }
     }

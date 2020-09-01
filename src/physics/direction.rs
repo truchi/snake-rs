@@ -1,4 +1,4 @@
-use std::ops::Not;
+use std::ops::Neg;
 
 /// A type to represent the four `Direction`s.
 #[derive(Copy, Clone, Eq, PartialEq, Debug)]
@@ -42,10 +42,10 @@ impl Direction {
     }
 }
 
-impl Not for Direction {
+impl Neg for Direction {
     type Output = Self;
 
-    fn not(self) -> Self {
+    fn neg(self) -> Self {
         self.opposite()
     }
 }
