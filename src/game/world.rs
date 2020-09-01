@@ -31,7 +31,7 @@ impl World {
 
     pub fn update(&mut self) {}
 
-    fn set_direction(&mut self, direction: impl Into<Direction>) {
+    fn set_direction(&mut self, direction: Direction) {
         self.snake.set_direction(direction);
     }
 

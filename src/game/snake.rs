@@ -16,7 +16,7 @@ pub struct Snake {
 impl Snake {
     pub fn new(
         position: impl Into<Point>,
-        direction: impl Into<Direction>,
+        direction: Direction,
         speed: impl Into<Speed2D>,
     ) -> Self {
         let mut body = VecDeque::new();
@@ -24,14 +24,12 @@ impl Snake {
 
         Self {
             body,
-            direction: direction.into(),
+            direction,
             speed: speed.into(),
         }
     }
 
-    pub fn set_direction(&mut self, direction: impl Into<Direction>) {
-        let direction = direction.into();
-
+    pub fn set_direction(&mut self, direction: Direction) {
         if self.direction != -direction {
             self.direction = direction
         }

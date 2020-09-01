@@ -21,9 +21,7 @@ impl Speed2D {
     }
 
     /// Returns the `Speed` on the specified `Direction`.
-    pub fn on_direction(&self, direction: impl Into<Direction>) -> Speed {
-        let direction = direction.into();
-
+    pub fn on_direction(&self, direction: Direction) -> Speed {
         match (direction.is_horizontal(), direction.is_positive()) {
             (true, true) => self.horizontal,
             (true, false) => -self.horizontal,
@@ -46,10 +44,10 @@ impl<T: From<Speed>, U: From<Speed>> From<Speed2D> for (T, U) {
 }
 
 /// Calls `Speed2D::on_direction`
-impl<T: Into<Direction>> Rem<T> for Speed2D {
+impl Rem<Direction> for Speed2D {
     type Output = Speed;
 
-    fn rem(self, rhs: T) -> Speed {
+    fn rem(self, rhs: Direction) -> Speed {
         self.on_direction(rhs)
     }
 }
