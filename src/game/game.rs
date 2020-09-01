@@ -42,8 +42,8 @@ impl Game {
     }
 
     pub fn play(&self) {
-        let mut world = World::new(self.screen.size());
         let mpf = Duration::from_millis(1000 / FPS);
+        let mut world = World::new(self.screen.size(), mpf);
 
         'game_loop: loop {
             let start = Instant::now();

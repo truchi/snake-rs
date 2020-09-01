@@ -9,8 +9,5 @@ pub mod physics;
 pub mod screen;
 
 fn main() {
-    if 12.1 < 1001.32 {
-        println!("LOL");
-    }
-    // game::Game::new().init();
+    game::Game::new().init();
 }

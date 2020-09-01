@@ -1,4 +1,4 @@
-use crate::physics::{Direction, Point, Speed2D};
+use crate::physics::{Direction, Moving, Point, Speed2D};
 use crossterm::cursor::MoveTo;
 use std::{
     collections::VecDeque,
@@ -8,6 +8,7 @@ use std::{
 /// The infamous `Snake`
 #[derive(Debug)]
 pub struct Snake {
+    position:  Point,
     body:      VecDeque<Point>,
     direction: Direction,
     speed:     Speed2D,
@@ -19,10 +20,12 @@ impl Snake {
         direction: Direction,
         speed: impl Into<Speed2D>,
     ) -> Self {
+        let position = position.into();
         let mut body = VecDeque::new();
-        body.push_front(position.into());
+        body.push_front(position);
 
         Self {
+            position,
             body,
             direction,
             speed: speed.into(),
@@ -35,41 +38,40 @@ impl Snake {
         }
     }
 
-    pub fn update(&mut self) -> Option<Point> {
-        let position = None;
+    pub fn grow(&mut self, point: impl Into<Point>) {
+        self.body.push_front(point.into());
+    }
 
-        position
+    pub fn shrink(&mut self) {
+        self.body.pop_back();
     }
 
     pub fn contains(&self, position: impl Into<Point>) -> bool {
         self.body.contains(&position.into())
     }
+}
 
-    // pub fn step(&mut self) {
-    // self.grow();
-    // self.body.pop_back();
-    // }
+impl Moving for Snake {
+    fn position(&mut self) -> &mut Point {
+        &mut self.position
+    }
 
-    // fn head(&self) -> Point {
-    // *self.body.front().expect("Snake body is empty")
-    // }
+    fn direction(&self) -> Direction {
+        self.direction
+    }
 
-    // pub fn grow(&mut self) {
-    // self.body.push_front(self.next_head());
-    // }
-
-    // fn next_head(&self) -> Point {
-    // self.head() + self.direction
-    // }
+    fn speed(&self) -> Speed2D {
+        self.speed
+    }
 }
 
 impl Display for Snake {
     fn fmt(&self, f: &mut Formatter) -> std::fmt::Result {
-        for position in &self.body {
+        for point in &self.body {
             write!(
                 f,
                 "{}🐍", // 🍭🐍👅🦀
-                MoveTo(position.x.as_units() as u16, position.y.as_units() as u16)
+                MoveTo(point.x as u16, point.y as u16)
             )?;
         }
 

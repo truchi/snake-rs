@@ -1,22 +1,30 @@
 use super::Snake;
 use crate::{
     events::KeyCode,
-    physics::{Direction, Point},
+    physics::{Direction, Moving, Point},
 };
 use crossterm::terminal::{Clear, ClearType};
-use std::fmt::{Display, Formatter};
+use std::{
+    fmt::{Display, Formatter},
+    time::Duration,
+};
 
 #[derive(Debug)]
 pub struct World {
     bounds: Point,
+    delta:  Duration,
     snake:  Snake,
 }
 
 impl World {
-    pub fn new(bounds: Point) -> Self {
-        let snake = Snake::new(Point::new(0, 0), Direction::Right, (20, 8));
+    pub fn new(bounds: Point, delta: Duration) -> Self {
+        let snake = Snake::new((0.0, 0.0), Direction::Right, (20.0, 8.0));
 
-        Self { bounds, snake }
+        Self {
+            bounds,
+            delta,
+            snake,
+        }
     }
 
     pub fn handle(&mut self, code: KeyCode) {
@@ -29,7 +37,12 @@ impl World {
         }
     }
 
-    pub fn update(&mut self) {}
+    pub fn update(&mut self) {
+        if let Some(point) = <Snake as Moving>::update(&mut self.snake, self.delta) {
+            self.snake.grow(point);
+            self.snake.shrink();
+        }
+    }
 
     fn set_direction(&mut self, direction: Direction) {
         self.snake.set_direction(direction);
