@@ -1,11 +1,12 @@
 use super::{Distance, Duration};
 use std::{
+    cmp::Ordering,
     fmt::{Debug, Error, Formatter},
     ops::{Mul, Neg},
 };
 
 /// A `Speed` type to represent a `Distance` over a `Duration`.
-#[derive(Copy, Clone, Eq, PartialEq, Default)]
+#[derive(Copy, Clone, Default)]
 pub struct Speed {
     /// The `Distance`.
     distance: Distance,
@@ -55,6 +56,35 @@ impl Speed {
     /// Multiplies a `Speed` by a `Duration` to produce the traveled `Distance`.
     pub fn mul_duration(&self, rhs: impl Into<Duration>) -> Distance {
         self.distance * (rhs.into().as_secs_f64() / self.duration.as_secs_f64())
+    }
+}
+
+impl PartialEq for Speed {
+    fn eq(&self, other: &Self) -> bool {
+        self.as_units_per_sec() == other.as_units_per_sec()
+    }
+}
+
+impl Eq for Speed {}
+
+impl PartialOrd for Speed {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        Some(self.cmp(other))
+    }
+}
+
+impl Ord for Speed {
+    fn cmp(&self, other: &Self) -> Ordering {
+        let a = self.as_units_per_sec();
+        let b = other.as_units_per_sec();
+
+        if a < b {
+            Ordering::Less
+        } else if a == b {
+            Ordering::Equal
+        } else {
+            Ordering::Greater
+        }
     }
 }
 
@@ -139,6 +169,23 @@ mod tests {
         assert_eq!(
             Speed::new(Distance::new(9, 200), Duration::new(2, 0)).as_units_per_sec(),
             4.6
+        );
+    }
+
+    #[test]
+    fn eq() {
+        assert_eq!(
+            Speed::new(Distance::new(1, 0), Duration::new(1, 0)),
+            Speed::new(Distance::new(60, 0), Duration::new(60, 0)),
+        );
+    }
+
+    #[test]
+    fn cmp() {
+        assert_eq!(
+            Speed::new(Distance::new(1, 0), Duration::new(1, 0))
+                > Speed::new(Distance::new(2, 0), Duration::new(60, 0)),
+            true
         );
     }
 

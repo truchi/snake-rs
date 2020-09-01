@@ -7,7 +7,7 @@ use std::{
 ///
 /// Each `Distance` is composed of a whole number of units and a fractional part
 /// represented in milliunits.
-#[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Default)]
+#[derive(Copy, Clone, Ord, PartialOrd, Eq, PartialEq, Default)]
 pub struct Distance {
     /// The number of units.
     units:  i16,
