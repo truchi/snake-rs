@@ -21,7 +21,7 @@ impl Speed2D {
     }
 
     /// Returns the `Speed` on the specified `Direction`
-    pub fn on_direction(self, direction: impl Into<Direction>) -> Speed {
+    pub fn on_direction(&self, direction: impl Into<Direction>) -> Speed {
         if direction.into().is_horizontal() {
             self.horizontal
         } else {

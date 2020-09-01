@@ -40,12 +40,12 @@ impl Speed {
     }
 
     /// Returns a `Speed` as units per second.
-    pub fn as_units_per_sec(self) -> f64 {
+    pub fn as_units_per_sec(&self) -> f64 {
         self.distance.as_units_f64() / self.duration.as_secs_f64()
     }
 
     /// Multiplies a `Speed` by a `Duration` to produce the traveled `Distance`.
-    pub fn mul_duration(self, rhs: impl Into<Duration>) -> Distance {
+    pub fn mul_duration(&self, rhs: impl Into<Duration>) -> Distance {
         self.distance * (rhs.into().as_secs_f64() / self.duration.as_secs_f64())
     }
 }

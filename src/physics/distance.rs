@@ -44,19 +44,19 @@ impl Distance {
     /// Returns the number of *whole* units in this `Distance`.
     ///
     /// Does not include the fractional (millis) part.
-    pub fn as_units(self) -> i16 {
+    pub fn as_units(&self) -> i16 {
         self.units
     }
 
     /// Returns the number of units as `f64` in this `Distance`.
     ///
     /// Includes the fractional (millis) part.
-    pub fn as_units_f64(self) -> f64 {
+    pub fn as_units_f64(&self) -> f64 {
         f64::from(self.units) + f64::from(self.millis) / 1_000.0
     }
 
     /// Adds two `Distance` together.
-    pub fn add(self, rhs: impl Into<Self>) -> Self {
+    pub fn add(&self, rhs: impl Into<Self>) -> Self {
         let rhs = rhs.into();
         let mut units = self.units + rhs.units;
         let mut millis = self.millis + rhs.millis;
@@ -71,7 +71,7 @@ impl Distance {
     }
 
     /// Multiplies a `Distance` by `f64`.
-    pub fn mul_f64(self, rhs: impl Into<f64>) -> Self {
+    pub fn mul_f64(&self, rhs: impl Into<f64>) -> Self {
         Self::from_units_f64(rhs.into() * self.as_units_f64())
     }
 }
@@ -116,7 +116,7 @@ impl<T: Into<Self>> Add<T> for Distance {
     type Output = Self;
 
     fn add(self, rhs: T) -> Self {
-        self.add(rhs)
+        Self::add(&self, rhs)
     }
 }
 

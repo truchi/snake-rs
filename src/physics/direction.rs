@@ -1,3 +1,5 @@
+use std::ops::Not;
+
 /// A type to represent the four `Direction`s.
 #[derive(Copy, Clone, Eq, PartialEq, Debug)]
 pub enum Direction {
@@ -22,12 +24,29 @@ impl Direction {
         }
     }
 
-    /// Returns `true` if horizontal.
+    /// Returns `true` if the `Direction` is horizontal.
     pub fn is_horizontal(&self) -> bool {
         match self {
             Direction::Left | Direction::Right => true,
             _ => false,
         }
+    }
+
+    /// Returns `true` if the `Direction` is heading towards the positive side
+    /// of the axis.
+    pub fn is_positive(&self) -> bool {
+        match self {
+            Direction::Right | Direction::Down => true,
+            _ => false,
+        }
+    }
+}
+
+impl Not for Direction {
+    type Output = Self;
+
+    fn not(self) -> Self {
+        self.opposite()
     }
 }
 
@@ -50,5 +69,13 @@ mod tests {
         assert_eq!(Direction::Down.is_horizontal(), false);
         assert_eq!(Direction::Left.is_horizontal(), true);
         assert_eq!(Direction::Right.is_horizontal(), true);
+    }
+
+    #[test]
+    fn is_positive() {
+        assert_eq!(Direction::Up.is_positive(), false);
+        assert_eq!(Direction::Down.is_positive(), true);
+        assert_eq!(Direction::Left.is_positive(), false);
+        assert_eq!(Direction::Right.is_positive(), true);
     }
 }

@@ -23,7 +23,7 @@ impl Point {
     }
 
     /// Adds a `Distance` to each of the coordinates of a `Point`.
-    pub fn add_distance(self, rhs: impl Into<Distance>) -> Self {
+    pub fn add_distance(&self, rhs: impl Into<Distance>) -> Self {
         let rhs = rhs.into();
 
         Self {
