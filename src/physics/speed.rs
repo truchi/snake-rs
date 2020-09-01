@@ -1,7 +1,7 @@
 use super::{Distance, Duration};
 use std::{
     fmt::{Debug, Error, Formatter},
-    ops::Mul,
+    ops::{Mul, Neg},
 };
 
 /// A `Speed` type to represent a `Distance` over a `Duration`.
@@ -44,6 +44,14 @@ impl Speed {
         self.distance.as_units_f64() / self.duration.as_secs_f64()
     }
 
+    /// Changes the sign of the `Speed`
+    pub fn neg(&self) -> Self {
+        Self {
+            distance: -self.distance,
+            duration: self.duration,
+        }
+    }
+
     /// Multiplies a `Speed` by a `Duration` to produce the traveled `Distance`.
     pub fn mul_duration(&self, rhs: impl Into<Duration>) -> Distance {
         self.distance * (rhs.into().as_secs_f64() / self.duration.as_secs_f64())
@@ -71,6 +79,14 @@ impl From<i16> for Speed {
 impl From<Speed> for f64 {
     fn from(speed: Speed) -> Self {
         speed.as_units_per_sec()
+    }
+}
+
+impl Neg for Speed {
+    type Output = Self;
+
+    fn neg(self) -> Self {
+        Self::neg(&self)
     }
 }
 
@@ -123,6 +139,14 @@ mod tests {
         assert_eq!(
             Speed::new(Distance::new(9, 200), Duration::new(2, 0)).as_units_per_sec(),
             4.6
+        );
+    }
+
+    #[test]
+    fn neg() {
+        assert_eq!(
+            Speed::new(Distance::new(7, 2), Duration::from_millis(15)).neg(),
+            Speed::new(Distance::new(-7, 2), Duration::from_millis(15)),
         );
     }
 
