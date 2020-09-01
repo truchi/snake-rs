@@ -55,6 +55,12 @@ impl Distance {
         f64::from(self.units) + f64::from(self.millis) / 1_000.0
     }
 
+    /// Returns a new `Distance` only with the whole part of `self`,
+    /// discarding the fractional part.
+    pub fn trunc(&self) -> Self {
+        Self::from_units(self.as_units())
+    }
+
     /// Changes the sign of the `Distance`.
     pub fn neg(&self) -> Self {
         Self {
@@ -212,6 +218,12 @@ mod tests {
     #[test]
     fn as_units_f64() {
         assert_eq!(Distance::new(8, 374).as_units_f64(), 8.374);
+    }
+
+    #[test]
+    fn trunc() {
+        assert_eq!(Distance::new(43, 665).trunc(), Distance::new(43, 0));
+        assert_eq!(Distance::new(-27, 314).trunc(), Distance::new(-27, 0));
     }
 
     #[test]

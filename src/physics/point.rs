@@ -22,6 +22,15 @@ impl Point {
         }
     }
 
+    /// Returns a new `Point` only with the whole part of its coordinates,
+    /// discarding the fractional parts.
+    pub fn trunc(&self) -> Self {
+        Self {
+            x: self.x.trunc(),
+            y: self.y.trunc(),
+        }
+    }
+
     /// Adds a `Distance` to each of the coordinates of a `Point`.
     pub fn add_distance(&self, rhs: impl Into<Distance>) -> Self {
         let rhs = rhs.into();
@@ -78,6 +87,14 @@ mod tests {
                 x: Distance::new(1, 23),
                 y: Distance::new(4, 56),
             }
+        );
+    }
+
+    #[test]
+    fn trunc() {
+        assert_eq!(
+            Point::new(Distance::new(7, 777), Distance::new(8, 888)).trunc(),
+            Point::new(Distance::new(7, 0), Distance::new(8, 0))
         );
     }
 
