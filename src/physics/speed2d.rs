@@ -20,12 +20,15 @@ impl Speed2D {
         }
     }
 
-    /// Returns the `Speed` on the specified `Direction`
+    /// Returns the `Speed` on the specified `Direction`.
     pub fn on_direction(&self, direction: impl Into<Direction>) -> Speed {
-        if direction.into().is_horizontal() {
-            self.horizontal
-        } else {
-            self.vertical
+        let direction = direction.into();
+
+        match (direction.is_horizontal(), direction.is_positive()) {
+            (true, true) => self.horizontal,
+            (true, false) => -self.horizontal,
+            (false, true) => self.vertical,
+            (false, false) => -self.vertical,
         }
     }
 }
@@ -73,9 +76,9 @@ mod tests {
         let vertical = Speed::from_units_per_sec(4);
         let speed2d = Speed2D::new(horizontal, vertical);
 
-        assert_eq!(speed2d.on_direction(Direction::Up), vertical);
+        assert_eq!(speed2d.on_direction(Direction::Up), -vertical);
         assert_eq!(speed2d.on_direction(Direction::Down), vertical);
-        assert_eq!(speed2d.on_direction(Direction::Left), horizontal);
+        assert_eq!(speed2d.on_direction(Direction::Left), -horizontal);
         assert_eq!(speed2d.on_direction(Direction::Right), horizontal);
     }
 }
