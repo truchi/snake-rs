@@ -1,4 +1,4 @@
-use super::Point;
+use super::{Point, Speed, Speed2D};
 use std::{
     fmt::{Debug, Error, Formatter},
     ops::Neg,
@@ -20,11 +20,24 @@ pub enum Direction {
 impl Into<Point> for Direction {
     fn into(self) -> Point {
         match self {
-            Self::Up => Point::new(0.0, -1.0),
-            Self::Down => Point::new(0.0, 1.0),
-            Self::Left => Point::new(-1.0, 0.0),
-            Self::Right => Point::new(1.0, 0.0),
+            Self::Up => (0.0, -1.0),
+            Self::Down => (0.0, 1.0),
+            Self::Left => (-1.0, 0.0),
+            Self::Right => (1.0, 0.0),
         }
+        .into()
+    }
+}
+
+impl Into<Speed2D> for Direction {
+    fn into(self) -> Speed2D {
+        match self {
+            Self::Up => (Speed::from_per_sec(0.0), Speed::from_per_sec(-1.0)),
+            Self::Down => (Speed::from_per_sec(0.0), Speed::from_per_sec(1.0)),
+            Self::Left => (Speed::from_per_sec(-1.0), Speed::from_per_sec(0.0)),
+            Self::Right => (Speed::from_per_sec(1.0), Speed::from_per_sec(0.0)),
+        }
+        .into()
     }
 }
 
@@ -66,6 +79,17 @@ mod tests {
         assert_eq!(into(Direction::Down), Point::new(0.0, 1.0));
         assert_eq!(into(Direction::Left), Point::new(-1.0, 0.0));
         assert_eq!(into(Direction::Right), Point::new(1.0, 0.0));
+    }
+
+    #[test]
+    fn into_speed() {
+        let into = <Direction as Into<Speed2D>>::into;
+        let per_sec = Speed::<f64>::from_per_sec;
+
+        assert_eq!(into(Direction::Up), (per_sec(0.0), per_sec(-1.0)).into());
+        assert_eq!(into(Direction::Down), (per_sec(0.0), per_sec(1.0)).into());
+        assert_eq!(into(Direction::Left), (per_sec(-1.0), per_sec(0.0)).into());
+        assert_eq!(into(Direction::Right), (per_sec(1.0), per_sec(0.0)).into());
     }
 
     #[test]

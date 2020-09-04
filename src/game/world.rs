@@ -1,4 +1,4 @@
-use super::Snake;
+use super::{Food, Snake};
 use crate::{
     events::KeyCode,
     physics::{Direction, Moving, Point},
@@ -14,16 +14,19 @@ pub struct World {
     bounds: Point,
     delta:  Duration,
     snake:  Snake,
+    food:   Food,
 }
 
 impl World {
     pub fn new(bounds: Point, delta: Duration) -> Self {
         let snake = Snake::new((0.0, 0.0), Direction::Right, (20.0, 8.0));
+        let food = Food::new((10, 10));
 
         Self {
             bounds,
             delta,
             snake,
+            food,
         }
     }
 
@@ -38,7 +41,7 @@ impl World {
     }
 
     pub fn update(&mut self) {
-        if let Some(point) = <Snake as Moving>::update(&mut self.snake, self.delta) {
+        if let Some(point) = self.snake.r#move(self.delta) {
             self.snake.grow(point);
             self.snake.shrink();
         }

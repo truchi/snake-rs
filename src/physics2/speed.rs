@@ -40,7 +40,7 @@ impl<T> Speed<T> {
         Self::new_uncheked(per_sec, Duration::from_secs(1))
     }
 
-    /// Returns this `Speed` expressed as `T` per second.
+    /// Returns this `Speed` expressed as `T`s per second.
     pub fn as_per_sec(&self) -> T
     where
         T: Div<Distance, Output = T> + Clone,
@@ -52,12 +52,6 @@ impl<T> Speed<T> {
 impl<T> From<(T, Duration)> for Speed<T> {
     fn from((distance, duration): (T, Duration)) -> Self {
         Self::new(distance, duration)
-    }
-}
-
-impl<T> From<Speed<T>> for (T, Duration) {
-    fn from(Speed { distance, duration }: Speed<T>) -> Self {
-        (distance, duration)
     }
 }
 
@@ -133,14 +127,6 @@ mod tests {
         assert_eq!(
             Speed::from((19.0, Duration::new(3, 0))),
             Speed::new(19.0, Duration::new(3, 0))
-        );
-    }
-
-    #[test]
-    fn into_tuple() {
-        assert_eq!(
-            <(f32, Duration)>::from(Speed::new(29.0, Duration::new(3, 0))),
-            (29.0, Duration::new(3, 0)),
         );
     }
 

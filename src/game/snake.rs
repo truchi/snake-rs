@@ -1,4 +1,4 @@
-use crate::physics::{Direction, Moving, Point, Speed2D};
+use crate::physics::{Direction, Duration, Moving, Point, Speed2D};
 use crossterm::cursor::MoveTo;
 use std::{
     collections::VecDeque,
@@ -22,7 +22,7 @@ impl Snake {
     ) -> Self {
         let position = position.into();
         let mut body = VecDeque::new();
-        body.push_front(position);
+        body.push_front(position.trunc());
 
         Self {
             position,
@@ -39,7 +39,7 @@ impl Snake {
     }
 
     pub fn grow(&mut self, point: impl Into<Point>) {
-        self.body.push_front(point.into());
+        self.body.push_front(point.into().trunc());
     }
 
     pub fn shrink(&mut self) {
@@ -52,16 +52,18 @@ impl Snake {
 }
 
 impl Moving for Snake {
-    fn position(&mut self) -> &mut Point {
-        &mut self.position
-    }
+    fn r#move(&mut self, delta: Duration) -> Option<Point> {
+        let mut ret = None;
 
-    fn direction(&self) -> Direction {
-        self.direction
-    }
+        let position = self.position;
+        let new_position = position + (self.speed * delta) % self.direction;
 
-    fn speed(&self) -> Speed2D {
-        self.speed
+        if new_position.trunc() != position.trunc() {
+            ret = Some(new_position);
+        }
+
+        self.position = new_position;
+        ret
     }
 }
 

@@ -4,7 +4,7 @@ use std::{
     ops::Mul,
 };
 
-/// A `Speed2D` type to represent `Speed`s on both X and Y axis.
+/// A `Speed2D` type to represent two distinct `Speed`s on X and Y axis.
 #[derive(Copy, Clone, Eq, PartialEq, Default)]
 pub struct Speed2D {
     /// The horizontal `Speed`.

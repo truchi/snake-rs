@@ -22,12 +22,6 @@ impl<T> From<(T, T)> for Coord2D<T> {
     }
 }
 
-impl<T> From<Coord2D<T>> for (T, T) {
-    fn from(Coord2D { x, y }: Coord2D<T>) -> Self {
-        (x, y)
-    }
-}
-
 impl<T: Clone> From<T> for Coord2D<T> {
     fn from(t: T) -> Self {
         Self::new(t.clone(), t)
@@ -94,12 +88,7 @@ mod tests {
     }
 
     #[test]
-    fn into_tuple() {
-        assert_eq!(<(f32, f32)>::from(Coord2D::new(4.0, 3.0)), (4.0, 3.0));
-    }
-
-    #[test]
-    fn from_T() {
+    fn from_t() {
         assert_eq!(Coord2D::from(12), Coord2D::new(12, 12));
     }
 
