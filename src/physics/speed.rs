@@ -2,26 +2,23 @@ use super::{Distance, Duration};
 use std::{
     cmp::Ordering,
     fmt::{Debug, Error, Formatter},
-    ops::Mul,
+    ops::{Div, Mul},
 };
 
-/// A `Speed` type to represent a `Distance` over a `Duration`.
+/// A `Speed<T>` type to represent some distance type `T` over a `Duration`.
 #[derive(Copy, Clone, Default)]
-pub struct Speed {
-    /// The `Distance`.
-    distance: Distance,
+pub struct Speed<T> {
+    /// The `T` distance.
+    distance: T,
     /// The `Duration`.
     duration: Duration,
 }
 
-impl Speed {
+impl<T> Speed<T> {
     /// Creates a new `Speed` with the specified `distance` and `duration`
     /// without checking if `duration` is zero.
-    pub fn new_uncheked(distance: impl Into<Distance>, duration: Duration) -> Self {
-        Self {
-            distance: distance.into(),
-            duration,
-        }
+    pub fn new_uncheked(distance: T, duration: Duration) -> Self {
+        Self { distance, duration }
     }
 
     /// Creates a new `Speed` with the specified `distance` and `duration`.
@@ -29,93 +26,65 @@ impl Speed {
     /// # Panics
     ///
     /// Panics if `duration` is zero.
-    pub fn new(distance: impl Into<Distance>, duration: Duration) -> Self {
+    pub fn new(distance: T, duration: Duration) -> Self {
         assert!(
             duration != Duration::from_secs(0),
             "Duration cannot be zero"
         );
 
-        Self::new_uncheked(distance.into(), duration)
+        Self::new_uncheked(distance, duration)
     }
 
-    /// Creates a new `Speed` from a `per_sec` speed as `Distance`.
-    pub fn from_per_sec(per_sec: Distance) -> Self {
+    /// Creates a new `Speed` from a `per_sec` speed as `T`.
+    pub fn from_per_sec(per_sec: T) -> Self {
         Self::new_uncheked(per_sec, Duration::from_secs(1))
     }
 
-    /// Returns a `Speed` as `Distance` per second.
-    pub fn as_per_sec(&self) -> Distance {
-        self.distance / self.duration.as_secs_f64()
+    /// Returns this `Speed` expressed as `T`s per second.
+    pub fn as_per_sec(&self) -> T
+    where
+        T: Div<Distance, Output = T> + Clone,
+    {
+        self.distance.clone() / self.duration.as_secs_f64()
     }
+}
 
-    /// Multiplies a `Speed` by a `Duration` to produce the traveled `Distance`.
-    pub fn mul_duration(&self, rhs: Duration) -> Distance {
+impl<T> From<(T, Duration)> for Speed<T> {
+    fn from((distance, duration): (T, Duration)) -> Self {
+        Self::new(distance, duration)
+    }
+}
+
+/// Multiplies a `Speed` by a `Duration` to produce the traveled distance `T`.
+impl<T: Mul<Distance>> Mul<Duration> for Speed<T> {
+    type Output = <T as Mul<Distance>>::Output;
+
+    fn mul(self, rhs: Duration) -> Self::Output {
         self.distance * (rhs.as_secs_f64() / self.duration.as_secs_f64())
     }
 }
 
-impl PartialEq for Speed {
+impl<T: Div<Distance, Output = T> + PartialEq + Clone> PartialEq for Speed<T> {
     fn eq(&self, other: &Self) -> bool {
         self.as_per_sec() == other.as_per_sec()
     }
 }
 
-impl Eq for Speed {}
+impl<T: Div<Distance, Output = T> + Eq + Clone> Eq for Speed<T> {}
 
-impl PartialOrd for Speed {
+impl<T: Div<Distance, Output = T> + PartialOrd + Clone> PartialOrd for Speed<T> {
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
-        Some(self.cmp(other))
+        self.as_per_sec().partial_cmp(&other.as_per_sec())
     }
 }
 
-impl Ord for Speed {
+impl<T: Div<Distance, Output = T> + Ord + Clone> Ord for Speed<T> {
     fn cmp(&self, other: &Self) -> Ordering {
-        let a = self.as_per_sec();
-        let b = other.as_per_sec();
-
-        if a < b {
-            Ordering::Less
-        } else if a == b {
-            Ordering::Equal
-        } else {
-            Ordering::Greater
-        }
+        self.as_per_sec().cmp(&other.as_per_sec())
     }
 }
 
-impl<T: Into<Distance>> From<(T, Duration)> for Speed {
-    fn from((distance, duration): (T, Duration)) -> Self {
-        Self::new(distance.into(), duration)
-    }
-}
-
-impl<T: From<Distance>> From<Speed> for (T, Duration) {
-    fn from(speed: Speed) -> Self {
-        (speed.distance.into(), speed.duration)
-    }
-}
-
-impl From<Distance> for Speed {
-    fn from(per_sec: Distance) -> Self {
-        Self::from_per_sec(per_sec)
-    }
-}
-
-impl From<Speed> for Distance {
-    fn from(speed: Speed) -> Self {
-        speed.as_per_sec()
-    }
-}
-
-impl Mul<Duration> for Speed {
-    type Output = Distance;
-
-    fn mul(self, rhs: Duration) -> Distance {
-        self.mul_duration(rhs)
-    }
-}
-
-impl Debug for Speed {
+impl<T: Debug> Debug for Speed<T> {
     fn fmt(&self, f: &mut Formatter) -> Result<(), Error> {
         write!(f, "{:?}/{:?}", self.distance, self.duration)
     }
@@ -154,6 +123,22 @@ mod tests {
     }
 
     #[test]
+    fn from_tuple() {
+        assert_eq!(
+            Speed::from((19.0, Duration::new(3, 0))),
+            Speed::new(19.0, Duration::new(3, 0))
+        );
+    }
+
+    #[test]
+    fn mul_duration() {
+        assert_eq!(
+            Speed::new(2.253, Duration::from_millis(500)) * Duration::from_secs(1),
+            4.506
+        );
+    }
+
+    #[test]
     fn eq() {
         assert_eq!(
             Speed::new(1.0, Duration::new(1, 0)),
@@ -166,14 +151,6 @@ mod tests {
         assert_eq!(
             Speed::new(1.0, Duration::new(1, 0)) > Speed::new(2.0, Duration::new(60, 0)),
             true
-        );
-    }
-
-    #[test]
-    fn mul_duration() {
-        assert_eq!(
-            Speed::new(2.253, Duration::from_millis(500)).mul_duration(Duration::from_secs(1)),
-            4.506
         );
     }
 }
