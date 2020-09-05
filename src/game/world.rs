@@ -58,6 +58,7 @@ impl World {
     }
 
     pub fn update(&mut self) {
+        self.snake.commit_direction();
         self.snake.r#move(self.delta);
         self.food.r#move(self.delta);
     }

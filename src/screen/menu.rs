@@ -103,6 +103,7 @@ impl Menu {
             self.keys();
             self.out.flush().unwrap();
 
+            // TODO: read events instead of poll/wait
             loop {
                 if let Some(Event::Key(KeyEvent { code, .. })) = poll() {
                     match code {

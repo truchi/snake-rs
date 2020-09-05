@@ -8,11 +8,12 @@ use std::{
 /// The infamous `Snake`
 #[derive(Debug)]
 pub struct Snake {
-    position:  Point,
-    body:      VecDeque<Point>,
-    direction: Direction,
-    speed:     Speed2D,
-    last_tail: Option<Point>,
+    position:        Point,
+    body:            VecDeque<Point>,
+    direction:       Direction,
+    draft_direction: Direction,
+    speed:           Speed2D,
+    last_tail:       Option<Point>,
 }
 
 impl Snake {
@@ -30,6 +31,7 @@ impl Snake {
             position,
             body,
             direction,
+            draft_direction: direction,
             speed: speed.into(),
             last_tail,
         }
@@ -37,8 +39,12 @@ impl Snake {
 
     pub fn set_direction(&mut self, direction: Direction) {
         if self.direction != -direction {
-            self.direction = direction
+            self.draft_direction = direction
         }
+    }
+
+    pub fn commit_direction(&mut self) {
+        self.direction = self.draft_direction;
     }
 
     pub fn head(&self) -> Point {
