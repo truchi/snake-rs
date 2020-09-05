@@ -3,7 +3,7 @@ pub const RAW_MODE: bool = true;
 
 pub const TITLE: &str = "🐍🐍👅";
 
-pub const FPS: u64 = 60;
+pub const FPS: u64 = 5;
 
 pub const WELCOME_FPS: u64 = 100;
 pub const MENU_FPS: u64 = 20;

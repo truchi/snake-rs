@@ -9,9 +9,10 @@ use std::{
 #[derive(Debug)]
 pub struct Snake {
     position:  Point,
-    pub body:  VecDeque<Point>,
+    body:      VecDeque<Point>,
     direction: Direction,
     speed:     Speed2D,
+    last_tail: Option<Point>,
 }
 
 impl Snake {
@@ -23,12 +24,14 @@ impl Snake {
         let position = position.into();
         let mut body = VecDeque::new();
         body.push_front(position.round());
+        let last_tail = None;
 
         Self {
             position,
             body,
             direction,
             speed: speed.into(),
+            last_tail,
         }
     }
 
@@ -42,12 +45,24 @@ impl Snake {
         *self.body.get(0).expect("Snake have no body")
     }
 
-    pub fn grow(&mut self, point: impl Into<Point>) {
-        self.body.push_front(point.into().round());
+    pub fn grow_head(&mut self, i: u8) {
+        for _ in 0..i {
+            let head = self.head();
+            let direction: Point = self.direction.into();
+            self.body.push_front(head + direction);
+        }
     }
 
-    pub fn shrink(&mut self) {
-        self.body.pop_back();
+    pub fn grow_tail(&mut self) {
+        if let Some(last_tail) = self.last_tail.take() {
+            self.body.push_front(last_tail);
+        }
+    }
+
+    pub fn shrink(&mut self, i: u8) {
+        for _ in 0..i {
+            self.last_tail = self.body.pop_back();
+        }
     }
 
     pub fn contains(&self, position: impl Into<Point>) -> bool {
@@ -57,15 +72,15 @@ impl Snake {
 
 impl Moving for Snake {
     fn r#move(&mut self, duration: Duration) {
-        let duration_2d: Coord2D<Duration> = duration.into();
-        let direction_2d: Point = self.direction.into();
-        let new_position = self.position + (self.speed * duration_2d) * direction_2d;
+        let prev_position = self.position.round();
+        (&mut self.position, self.speed, self.direction).r#move(duration);
 
-        if self.position.round() != new_position.round() {
-            self.grow(new_position);
+        let position = self.position.round();
+        if position != prev_position {
+            let grow = (position - prev_position).length().round() as u8;
+            self.grow_head(grow);
+            self.shrink(grow);
         }
-
-        self.position = new_position;
     }
 }
 
