@@ -1,15 +1,15 @@
-use crate::physics::{Direction, Duration, Moving, Point, Speed2D};
+use crate::physics::{Coord2D, Direction, Duration, Moving, Point, Speed2D};
 use crossterm::cursor::MoveTo;
 use std::{
     collections::VecDeque,
-    fmt::{Display, Formatter},
+    fmt::{Display, Error, Formatter},
 };
 
 /// The infamous `Snake`
 #[derive(Debug)]
 pub struct Snake {
     position:  Point,
-    body:      VecDeque<Point>,
+    pub body:  VecDeque<Point>,
     direction: Direction,
     speed:     Speed2D,
 }
@@ -22,7 +22,7 @@ impl Snake {
     ) -> Self {
         let position = position.into();
         let mut body = VecDeque::new();
-        body.push_front(position.trunc());
+        body.push_front(position.round());
 
         Self {
             position,
@@ -38,8 +38,12 @@ impl Snake {
         }
     }
 
+    pub fn head(&self) -> Point {
+        *self.body.get(0).expect("Snake have no body")
+    }
+
     pub fn grow(&mut self, point: impl Into<Point>) {
-        self.body.push_front(point.into().trunc());
+        self.body.push_front(point.into().round());
     }
 
     pub fn shrink(&mut self) {
@@ -52,29 +56,23 @@ impl Snake {
 }
 
 impl Moving for Snake {
-    fn r#move(&mut self, delta: Duration) -> Option<Point> {
-        let mut ret = None;
+    fn r#move(&mut self, duration: Duration) {
+        let duration_2d: Coord2D<Duration> = duration.into();
+        let direction_2d: Point = self.direction.into();
+        let new_position = self.position + (self.speed * duration_2d) * direction_2d;
 
-        let position = self.position;
-        let new_position = position + (self.speed * delta) % self.direction;
-
-        if new_position.trunc() != position.trunc() {
-            ret = Some(new_position);
+        if self.position.round() != new_position.round() {
+            self.grow(new_position);
         }
 
         self.position = new_position;
-        ret
     }
 }
 
 impl Display for Snake {
-    fn fmt(&self, f: &mut Formatter) -> std::fmt::Result {
+    fn fmt(&self, f: &mut Formatter) -> Result<(), Error> {
         for point in &self.body {
-            write!(
-                f,
-                "{}🐍", // 🍭🐍👅🦀
-                MoveTo(point.x as u16, point.y as u16)
-            )?;
+            write!(f, "{}🐍", MoveTo(point.x as u16 * 2, point.y as u16))?;
         }
 
         Ok(())

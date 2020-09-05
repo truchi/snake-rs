@@ -1,12 +1,14 @@
 use super::{Food, Snake};
 use crate::{
     events::KeyCode,
-    physics::{Direction, Moving, Point},
+    physics::{Direction, Moving, PathFragment, Point, Speed2D},
 };
 use crossterm::terminal::{Clear, ClearType};
 use std::{
-    fmt::{Display, Formatter},
+    fmt::{Display, Error, Formatter},
+    iter::Cycle,
     time::Duration,
+    vec::IntoIter,
 };
 
 #[derive(Debug)]
@@ -14,13 +16,28 @@ pub struct World {
     bounds: Point,
     delta:  Duration,
     snake:  Snake,
-    food:   Food,
+    food:   Food<Cycle<IntoIter<PathFragment>>>,
 }
 
 impl World {
     pub fn new(bounds: Point, delta: Duration) -> Self {
-        let snake = Snake::new((0.0, 0.0), Direction::Right, (20.0, 8.0));
-        let food = Food::new((10, 10));
+        let snake = Snake::new(
+            (0.0, 0.0),
+            Direction::Right,
+            Speed2D::from_per_sec((10.0, 10.0)),
+        );
+
+        let food = Food::new(
+            (2.0, 2.0),
+            vec![
+                PathFragment::from((Duration::from_secs(3), (3.0, 0.0))),
+                PathFragment::from((Duration::from_secs(3), (0.0, 3.0))),
+                PathFragment::from((Duration::from_secs(3), (-3.0, 0.0))),
+                PathFragment::from((Duration::from_secs(3), (0.0, -3.0))),
+            ]
+            .into_iter()
+            .cycle(),
+        );
 
         Self {
             bounds,
@@ -41,10 +58,8 @@ impl World {
     }
 
     pub fn update(&mut self) {
-        if let Some(point) = self.snake.r#move(self.delta) {
-            self.snake.grow(point);
-            self.snake.shrink();
-        }
+        self.snake.r#move(self.delta);
+        self.food.r#move(self.delta);
     }
 
     fn set_direction(&mut self, direction: Direction) {
@@ -57,7 +72,7 @@ impl World {
 }
 
 impl Display for World {
-    fn fmt(&self, f: &mut Formatter) -> std::fmt::Result {
-        write!(f, "{}{}", Clear(ClearType::All), self.snake)
+    fn fmt(&self, f: &mut Formatter) -> Result<(), Error> {
+        write!(f, "{}{}{}", Clear(ClearType::All), self.snake, self.food)
     }
 }

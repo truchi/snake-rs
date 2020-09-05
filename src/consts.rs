@@ -1,3 +1,6 @@
+pub const ALTERNATE_SCREEN: bool = true;
+pub const RAW_MODE: bool = true;
+
 pub const TITLE: &str = "🐍🐍👅";
 
 pub const FPS: u64 = 60;

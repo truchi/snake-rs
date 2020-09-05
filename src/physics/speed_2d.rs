@@ -1,4 +1,4 @@
-use super::{Coord2D, Distance, Duration, Point, Speed};
+use super::{Coord2D, Direction, Distance, Duration, Point, Speed};
 
 /// A `Speed2D` type (`Coord2D<Speed<Distance>>`).
 pub type Speed2D = Coord2D<Speed<Distance>>;

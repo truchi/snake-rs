@@ -1,5 +1,8 @@
 use super::{Menu, MenuAction, Welcome, WelcomeAction};
-use crate::{consts::TITLE, physics::Point};
+use crate::{
+    consts::{ALTERNATE_SCREEN, RAW_MODE, TITLE},
+    physics::Point,
+};
 use crossterm::{
     cursor::{Hide, Show},
     execute,
@@ -16,9 +19,6 @@ use crossterm::{
     },
 };
 use std::io::{stdout, Stdout, Write};
-
-const ALTERNATE_SCREEN: bool = true;
-const RAW_MODE: bool = true;
 
 #[derive(Debug)]
 pub struct Screen {
@@ -60,7 +60,7 @@ impl Screen {
     }
 
     pub fn size(&self) -> Point {
-        (self.width as i16, self.height as i16).into()
+        (self.width as f64, self.height as f64).into()
     }
 
     pub fn clear(&mut self) {
